@@ -19,6 +19,14 @@ form {
   display: inline;
 }
 
+.centered {
+  text-align: center;
+}
+
+.my-custom-class-for-images {
+  max-width: 500px;
+}
+
 .main-header {
   width: 100%;
   height: 3.5rem;
