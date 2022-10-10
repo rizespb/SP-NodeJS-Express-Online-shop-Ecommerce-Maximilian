@@ -17,7 +17,7 @@
                                         <%= product.title %>
                                     </h1>
                                 </header>
-                                
+
                                 <div class="card__image">
                                     <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
                                 </div>
@@ -35,6 +35,9 @@
                                     <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn">Edit</a>
 
                                     <form action="/admin/delete-product" method="POST">
+                                        <!-- input с type=hidden добавляется для того, чтобы его не было видно на странице, но value из него можно было передать при отправке формы -->
+                                        <input type="hidden" value="<%= product.id %>" name="productId">
+
                                         <button class="btn" type="submit">Delete</button>
                                     </form>
                                 </div>
