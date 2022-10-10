@@ -49,7 +49,6 @@ exports.getCart = (req, res, next) => {
           cartProducts.push({ productData: product, qty: cartProductData.qty })
         }
       }
-      console.log(cartProducts)
 
       res.render('shop/cart', {
         pageTitle: 'Your cart',
@@ -69,6 +68,16 @@ exports.postCart = (req, res, next) => {
   })
 
   res.redirect('/cart')
+}
+
+// Удаление товара из корзины
+exports.postCartDeleteProduct = (req, res, next) => {
+  const prodId = req.body.productId
+
+  Product.findById(prodId, (product) => {
+    Cart.deleteProduct(prodId, product.price)
+    res.redirect('/cart')
+  })
 }
 
 exports.getOrders = (req, res, next) => {

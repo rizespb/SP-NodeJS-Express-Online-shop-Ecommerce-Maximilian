@@ -10,7 +10,16 @@
                         <% products.forEach(product=> { %>
 
                             <li>
-                                <%= product.productData.title %> (<%= product.qty %>)
+                                <p>
+                                    <%= product.productData.title %> (<%= product.qty %>)
+                                </p>
+
+                                <form action="/cart-delete-item" method="post">
+                                    <!-- input с type=hidden добавляется для того, чтобы его не было видно на странице, но value из него можно было передать при отправке формы -->
+                                    <input type="hidden" value="<%= product.productData.id %>" name="productId">
+
+                                    <button class="btn" type="submit">Delete</button>
+                                </form>
                             </li>
 
                             <% }) %>
