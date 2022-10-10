@@ -1,3 +1,5 @@
+<!-- Страница для редактирования или удаления товаров админом -->
+
 <%- include('../includes/head.ejs') %>
     <link rel="stylesheet" href="/css/product.css">
     </head>
@@ -6,7 +8,7 @@
         <%- include('../includes/navigation.ejs') %>
 
             <main>
-                <% if (prods.length > 0) { %>
+                <% if (prods.length> 0) { %>
                     <div class="grid">
                         <% for (let product of prods) { %>
                             <article class="card product-item">
@@ -15,9 +17,11 @@
                                         <%= product.title %>
                                     </h1>
                                 </header>
+                                
                                 <div class="card__image">
                                     <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
                                 </div>
+
                                 <div class="card__content">
                                     <h2 class="product__price">$
                                         <%= product.price %>
@@ -26,12 +30,13 @@
                                         <%= product.description %>
                                     </p>
                                 </div>
+
                                 <div class="card__actions">
-                                    <a href="/admin/edit-product" class="btn">Edit</a>
+                                    <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn">Edit</a>
+
                                     <form action="/admin/delete-product" method="POST">
                                         <button class="btn" type="submit">Delete</button>
                                     </form>
-
                                 </div>
                             </article>
                             <% } %>

@@ -15,7 +15,8 @@ const getProductsFromFile = (callback) => {
 }
 
 module.exports = class Product {
-  constructor(title, imageUrl, description, price) {
+  constructor(id, title, imageUrl, description, price) {
+    this.id = id
     this.title = title
     this.imageUrl = imageUrl
     this.description = description
@@ -23,16 +24,31 @@ module.exports = class Product {
   }
 
   save() {
-    // Использование Math.random не оптимально, но достаточно в рамках текущего проекта
-    this.id = Math.random().toString()
-
     // getProductsFromFile принимает коллбэк
     getProductsFromFile((products) => {
-      products.push(this)
+      // Для создания нового прдукта или обновления существующего будет использоваться один метод save
+      // Но каждый раз все равно создаем новый экземпляр Product.
+      // Если передали ID в constructor- тогда это обновление существующего
+      // Если передали null в качестве ID - добавление нового продукта
+      if (this.id) {
+        const existingProductIndex = products.findIndex((prod) => prod.id === this.id)
 
-      fs.writeFile(p, JSON.stringify(products), (err) => {
-        console.log(err)
-      })
+        const updatedProducts = [...products]
+        updatedProducts[existingProductIndex] = this
+
+        fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
+          console.log(err)
+        })
+      } else {
+        // Использование Math.random не оптимально, но достаточно в рамках текущего проекта
+        this.id = Math.random().toString()
+
+        products.push(this)
+
+        fs.writeFile(p, JSON.stringify(products), (err) => {
+          console.log(err)
+        })
+      }
     })
   }
 

@@ -1,4 +1,5 @@
 const Product = require('../models/product')
+const Cart = require('../models/cart')
 
 exports.getProducts = (req, res, next) => {
   // Метод render добавляется движком шаблонизатора
@@ -15,7 +16,6 @@ exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId
 
   Product.findById(prodId, (product) => {
-    console.log('FROM CONTROLLER', product)
     res.render('shop/product-detail', {
       product: product,
       pageTitle: product.title,
@@ -40,6 +40,17 @@ exports.getCart = (req, res, next) => {
     pageTitle: 'Your cart',
     path: '/cart',
   })
+}
+
+// Добавить товар в корзину
+exports.postCart = (req, res, next) => {
+  const prodId = req.body.productId
+
+  Product.findById(prodId, (product) => {
+    Cart.addProduct(prodId, product.price)
+  })
+
+  res.redirect('/cart')
 }
 
 exports.getOrders = (req, res, next) => {
