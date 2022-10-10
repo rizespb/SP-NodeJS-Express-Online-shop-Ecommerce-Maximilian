@@ -36,9 +36,27 @@ exports.getIndex = (req, res, next) => {
 }
 
 exports.getCart = (req, res, next) => {
-  res.render('shop/cart', {
-    pageTitle: 'Your cart',
-    path: '/cart',
+  // Товары в корзине содержат только id и количество
+  // Поэтому нам надо взять id каждого товара и найти его в products.json, чтобы потом на странице cart вывести всю инфу о нем
+  Cart.getProducts((cart) => {
+    Product.fetchAll((products) => {
+      const cartProducts = []
+
+      for (product of products) {
+        const cartProductData = cart.products.find((prod) => prod.id === product.id)
+
+        if (cartProductData) {
+          cartProducts.push({ productData: product, qty: cartProductData.qty })
+        }
+      }
+      console.log(cartProducts)
+
+      res.render('shop/cart', {
+        pageTitle: 'Your cart',
+        path: '/cart',
+        products: cartProducts,
+      })
+    })
   })
 }
 
