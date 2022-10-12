@@ -9,6 +9,8 @@ const errorController = require('./controllers/error')
 const sequelize = require('./util/database')
 const Product = require('./models/product')
 const User = require('./models/user')
+const Cart = require('./models/cart')
+const CartItem = require('./models/cart-item')
 
 const app = express()
 
@@ -44,7 +46,7 @@ app.use(shopRoutes)
 // Если к этому моменту мы не нашли никакого совпадающего роута, тогда вернем в ответе 404 страницу
 app.use(errorController.get404)
 
-// Уставновление связей в БД
+// <<<<<<<<<<<<<<<<<Уставновление связей в БД>>>>>>>>>>>>>>>>>>>>>>
 // Продукт создается юзером, поэтому belongTo
 Product.belongsTo(User, {
   constraints: true,
@@ -53,6 +55,14 @@ Product.belongsTo(User, {
 })
 // Это необязательная строка (Product.belongTo достаточно). Но она вносит дополнительную ясность
 User.hasMany(Product)
+// Точно также, как и выше, можно было бы определить только одно направление hasOne или belongsTo. И этого было бы достаточно
+User.hasOne(Cart)
+Cart.belongsTo(User)
+// Одна корзина может содержать много разных товаров
+// through - где хранить эту связь
+Cart.belongsToMany(Product, { through: CartItem })
+// ТОдин товар может находится в разных корзинах
+Product.belongsToMany(Cart, { through: CartItem })
 
 // Подключаемся к БД. Идет синхронизация: создание описанных в моделях таблиц и установка связей (если связи описаны)
 // { force: true } - только для редима разработки - пересоздавать таблицы каждый раз при старте приложения

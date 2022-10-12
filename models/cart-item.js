@@ -4,7 +4,7 @@ const sequelize = require('../util/database')
 
 // 1st - 'user' - имя модели
 // 2st - Описание структуры таблицы - полей и пр.
-const User = sequelize.define('user', {
+const CartItem = sequelize.define('cartItem', {
   id: {
     type: Sequelize.INTEGER,
     autoIncrement: true,
@@ -12,8 +12,7 @@ const User = sequelize.define('user', {
     // id будет являться первичным ключом, по которому будут выстраиваться связи между таблицами
     primaryKey: true,
   },
-  name: Sequelize.STRING,
-  email: Sequelize.STRING,
+  quantity: Sequelize.INTEGER,
 })
 
-module.exports = User
+module.exports = CartItem
