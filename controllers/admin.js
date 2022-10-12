@@ -17,14 +17,21 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl
   const price = req.body.price
   const description = req.body.description
-
-  const product = new Product(null, title, imageUrl, description, price)
-  product
-    .save()
-    .then(() => {
-      res.redirect('/')
+  // Создание и немедленное сохранение продукта в БД
+  Product.create({
+    title: title,
+    price: price,
+    imageUrl: imageUrl,
+    description: description,
+  })
+    .then((result) => {
+      //   console.log(result)
+      console.log('Created Product')
+      res.redirect('/admin/products')
     })
-    .catch((err) => console.log(err))
+    .catch((err) => {
+      console.log('Error from postAddProduct: ', err)
+    })
 }
 
 exports.getEditProduct = (req, res, next) => {
@@ -38,21 +45,25 @@ exports.getEditProduct = (req, res, next) => {
   const prodId = req.params.productId
 
   // Ищем в БД продукт по ID. Если нашли, возвращаем форму для редактирования и передаем в этот шаблон данные о продукте
-  Product.findById(prodId, (product) => {
-    if (!product) {
-      return res.redirect('/')
-    }
+  Product.findByPk(prodId)
+    .then((product) => {
+      if (!product) {
+        return res.redirect('/')
+      }
 
-    // Метод render добавляется движком шаблонизатора
-    // edit-product - универсальная форма для добавления или роедактирования продукта
-    res.render('admin/edit-product', {
-      pageTitle: 'Edit Product',
-      path: '/admin/edit-product',
-      // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
-      editing: editMode,
-      product: product,
+      // Метод render добавляется движком шаблонизатора
+      // edit-product - универсальная форма для добавления или роедактирования продукта
+      res.render('admin/edit-product', {
+        pageTitle: 'Edit Product',
+        path: '/admin/edit-product',
+        // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
+        editing: editMode,
+        product: product,
+      })
     })
-  })
+    .catch((err) => {
+      console.log('Error from getEditProduct: ', err)
+    })
 }
 
 // Обновление информации о продукте
@@ -63,27 +74,49 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl
   const updatedDesc = req.body.description
 
-  const updatedProduct = new Product(prodId, updatedTitle, updatedImageUrl, updatedDesc, updatedPrice)
+  Product.findByPk(prodId)
+    .then((product) => {
+      product.title = updatedTitle
+      product.price = updatedPrice
+      product.description = updatedDesc
+      product.imageUrl = updatedImageUrl
 
-  updatedProduct.save()
-
-  res.redirect('/admin/products')
+      // save() - метод sequelize - возвращает промис
+      return product.save()
+    })
+    .then(() => {
+      console.log('UPDATED PRODUCT')
+      res.redirect('/admin/products')
+    })
+    .catch((err) => {
+      console.log('Error from postEditProduct: ', err)
+    })
 }
 
 exports.getProducts = (req, res, next) => {
   // Метод render добавляется движком шаблонизатора
-  Product.fetchAll((products) => {
-    res.render('admin/products', {
-      prods: products,
-      pageTitle: 'Admin Products',
-      path: 'admin/products',
+  Product.findAll()
+    .then((products) => {
+      res.render('admin/products', {
+        prods: products,
+        pageTitle: 'Admin Products',
+        path: 'admin/products',
+      })
     })
-  })
+    .catch((err) => console.log('Error from getProducts: ', err))
 }
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId
 
-  Product.deleteById(prodId)
-  res.redirect('/admin/products')
+  // destroy() - метод sequelize - возвращает промис
+  Product.findByPk(prodId)
+    .then((product) => {
+      return product.destroy()
+    })
+    .then((result) => {
+      console.log('DESTROYED PRODUCT')
+      res.redirect('/admin/products')
+    })
+    .catch((err) => console.log('Error from postDeleteProduct: ', err))
 }

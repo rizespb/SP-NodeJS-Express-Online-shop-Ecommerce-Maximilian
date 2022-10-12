@@ -5,6 +5,9 @@ const bodyParser = require('body-parser')
 
 const errorController = require('./controllers/error')
 
+// Импортируем sequelize для коннекта с БД
+const sequelize = require('./util/database')
+
 const app = express()
 
 // Говорим, что будем использовать ejs
@@ -28,4 +31,13 @@ app.use(shopRoutes)
 // Если к этому моменту мы не нашли никакого совпадающего роута, тогда вернем в ответе 404 страницу
 app.use(errorController.get404)
 
-app.listen(3000)
+// Подключаемся к БД. Идет синхронизация: создание описанных в моделях таблиц и установка связей (если связи описаны)
+sequelize
+  .sync()
+  .then((result) => {
+    // console.log(result)
+    app.listen(3000)
+  })
+  .catch((err) => {
+    console.log('ERROR', err)
+  })

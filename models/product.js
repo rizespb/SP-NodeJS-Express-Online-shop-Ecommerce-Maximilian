@@ -1,3 +1,36 @@
+const Sequelize = require('sequelize')
+
+const sequelize = require('../util/database')
+
+// 1st - 'product' - имя модели
+// 2st - Описание структуры таблицы - полей и пр.
+const Product = sequelize.define('product', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    // id будет являться первичным ключом, по которому будут выстраиваться связи между таблицами
+    primaryKey: true,
+  },
+  title: Sequelize.STRING,
+  price: {
+    type: Sequelize.DOUBLE,
+    allowNull: false,
+  },
+  imageUrl: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  description: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+})
+
+module.exports = Product
+
+/*
+/// Ниже представлен второй вариант кода для работы с sql БД напрямую
 const db = require('../util/database')
 
 const Cart = require('./cart')
@@ -35,7 +68,9 @@ module.exports = class Product {
     return db.execute('SELECT * FROM products WHERE products.id = ?', [id])
   }
 }
+*/
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 /// Ниже представлен первоначальный код для работы с файлами в качестве хранилища данных
 const fs = require('fs')
