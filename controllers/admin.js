@@ -17,13 +17,16 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl
   const price = req.body.price
   const description = req.body.description
-  // Создание и немедленное сохранение продукта в БД
-  Product.create({
-    title: title,
-    price: price,
-    imageUrl: imageUrl,
-    description: description,
-  })
+
+  // Мы добавили объект user в запрос res в middleWare в app.js
+  // Метод createProduct у юзеров после установления связей в app.js Product.belongsTo(User)
+  req.user
+    .createProduct({
+      title: title,
+      price: price,
+      imageUrl: imageUrl,
+      description: description,
+    })
     .then((result) => {
       //   console.log(result)
       console.log('Created Product')
@@ -44,9 +47,13 @@ exports.getEditProduct = (req, res, next) => {
 
   const prodId = req.params.productId
 
-  // Ищем в БД продукт по ID. Если нашли, возвращаем форму для редактирования и передаем в этот шаблон данные о продукте
-  Product.findByPk(prodId)
-    .then((product) => {
+  // Мы добавили объект user в запрос res в middleWare в app.js
+  // Метод getProducts у юзеров после установления связей в app.js Product.belongsTo(User)
+  req.user
+    .getProducts({ where: { id: prodId } })
+    .then((products) => {
+      const product = products[0]
+
       if (!product) {
         return res.redirect('/')
       }
@@ -94,8 +101,11 @@ exports.postEditProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
+  // Мы добавили объект user в запрос res в middleWare в app.js
+  // Метод getProducts у юзеров после установления связей в app.js Product.belongsTo(User)
   // Метод render добавляется движком шаблонизатора
-  Product.findAll()
+  req.user
+    .getProducts()
     .then((products) => {
       res.render('admin/products', {
         prods: products,
