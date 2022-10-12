@@ -1,3 +1,43 @@
+const db = require('../util/database')
+
+const Cart = require('./cart')
+
+module.exports = class Product {
+  constructor(id, title, imageUrl, description, price) {
+    this.id = id
+    this.title = title
+    this.imageUrl = imageUrl
+    this.description = description
+    this.price = price
+  }
+
+  save() {
+    // Создать новую запись в таблице
+    // id не передаем, он будет сгененрирован автоматически
+    // Для обеспечения безопасности
+    // Вторым параметром в execute передаем значения
+    return db.execute('INSERT INTO products (title, price, imageUrl, description) VALUES (?, ?, ?, ?)', [
+      this.title,
+      this.price,
+      this.imageUrl,
+      this.description,
+    ])
+  }
+
+  static deleteById(id) {}
+
+  static fetchAll() {
+    // Получить все поля из products
+    return db.execute('SELECT * FROM products')
+  }
+
+  static findById(id) {
+    return db.execute('SELECT * FROM products WHERE products.id = ?', [id])
+  }
+}
+
+/*
+/// Ниже представлен первоначальный код для работы с файлами в качестве хранилища данных
 const fs = require('fs')
 const path = require('path')
 
@@ -80,3 +120,4 @@ module.exports = class Product {
     })
   }
 }
+*/
