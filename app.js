@@ -11,6 +11,8 @@ const Product = require('./models/product')
 const User = require('./models/user')
 const Cart = require('./models/cart')
 const CartItem = require('./models/cart-item')
+const Order = require('./models/order')
+const OrderItem = require('./models/order-item')
 
 const app = express()
 
@@ -61,8 +63,11 @@ Cart.belongsTo(User)
 // Одна корзина может содержать много разных товаров
 // through - где хранить эту связь
 Cart.belongsToMany(Product, { through: CartItem })
-// ТОдин товар может находится в разных корзинах
+// Один товар может находится в разных корзинах
 Product.belongsToMany(Cart, { through: CartItem })
+Order.belongsTo(User)
+User.hasMany(Order)
+Order.belongsToMany(Product, { through: OrderItem })
 
 // Подключаемся к БД. Идет синхронизация: создание описанных в моделях таблиц и установка связей (если связи описаны)
 // { force: true } - только для редима разработки - пересоздавать таблицы каждый раз при старте приложения
@@ -80,8 +85,15 @@ sequelize
 
     return Promise.resolve(user)
   })
-  .then((user) => {
-    // console.log(user)
+  .then(async (user) => {
+    const cart = await user.getCart()
+
+    return cart ? Promise.resolve() : user.createCart()
+    // Это моя доработка, т.к. несмотря на свзяь 1-к-1, все равно создается несколько корзин.
+    // В варианте Максимилиана выглядело так:
+    // return user.createCart()
+  })
+  .then((cart) => {
     app.listen(3000)
   })
   .catch((err) => {
