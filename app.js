@@ -4,15 +4,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const errorController = require('./controllers/error')
-
-// Импортируем sequelize для коннекта с БД
-const sequelize = require('./util/database')
-const Product = require('./models/product')
-const User = require('./models/user')
-const Cart = require('./models/cart')
-const CartItem = require('./models/cart-item')
-const Order = require('./models/order')
-const OrderItem = require('./models/order-item')
+const mongoConnect = require('./util/database').mongoConnect
 
 const app = express()
 
@@ -32,6 +24,25 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use((req, res, next) => {
+  next()
+})
+
+app.use('/admin', adminRoutes)
+app.use(shopRoutes)
+
+// Если к этому моменту мы не нашли никакого совпадающего роута, тогда вернем в ответе 404 страницу
+app.use(errorController.get404)
+
+mongoConnect(() => {
+  app.listen(3000)
+})
+
+/*
+/////////////////////////////////// ВАРИНАТ SQL ////////////////////////////////
+/// Ниже представлен первоначальный код для работы с SQL БД
+
+// Поиск текущего пользователя в БД и добавление объекта пользователя в запрос
+app.use((req, res, next) => {
   User.findByPk(1)
     .then((user) => {
       req.user = user
@@ -42,11 +53,17 @@ app.use((req, res, next) => {
     })
 })
 
-app.use('/admin', adminRoutes)
-app.use(shopRoutes)
 
-// Если к этому моменту мы не нашли никакого совпадающего роута, тогда вернем в ответе 404 страницу
-app.use(errorController.get404)
+
+// Импортируем sequelize для коннекта с БД
+const sequelize = require('./util/database')
+const Product = require('./models/product')
+const User = require('./models/user')
+const Cart = require('./models/cart')
+const CartItem = require('./models/cart-item')
+const Order = require('./models/order')
+const OrderItem = require('./models/order-item')
+
 
 // <<<<<<<<<<<<<<<<<Уставновление связей в БД>>>>>>>>>>>>>>>>>>>>>>
 // Продукт создается юзером, поэтому belongTo
@@ -99,3 +116,4 @@ sequelize
   .catch((err) => {
     console.log('ERROR', err)
   })
+*/

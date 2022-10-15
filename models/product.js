@@ -1,3 +1,69 @@
+const mongodb = require('mongodb')
+const getDb = require('../util/database').getDb
+
+class Product {
+  constructor(title, price, description, imageUrl) {
+    this.title = title
+    this.price = price
+    this.description = description
+    this.imageUrl = imageUrl
+  }
+
+  save() {
+    const db = getDb()
+
+    return db
+      .collection('products')
+      .insertOne(this)
+      .then((result) => {
+        console.log('Result from save', result)
+      })
+      .catch((err) => console.log('Error from Product.save: ', err))
+  }
+
+  static fetchAll() {
+    const db = getDb()
+
+    // return db.collection('products').find({title: 'Book'})
+    return (
+      db
+        .collection('products')
+        .find()
+        //   Cursor – объект, возвращаемый из коллекции, например, методом find. Из коллекции может вернуться миллион документов. Но все они нам не нужны. Поэтому мы получаем Курсор, который поможет нам пройтись по этому объекту и получить, скажем, первые 10 документов.
+        .toArray()
+        .then((products) => {
+          console.log(products)
+          return products
+        })
+        .catch((err) => console.log('Error from Product.fetchAll: ', err))
+    )
+  }
+
+  static findById(prodId) {
+    const db = getDb()
+
+    return (
+      db
+        .collection('products')
+        // Монго автоматически формирует _id, но это не JS-тип. Это спец объект ObjectId. Поэтому надо в качестве id передавать сущность класса ObjectId
+        .find({ _id: new mongodb.ObjectId(prodId) })
+        // Cursor – объект, возвращаемый из коллекции, например, методом find. Из коллекции может вернуться миллион документов. Но все они нам не нужны. Поэтому мы получаем Курсор, который поможет нам пройтись по этому объекту и получить, скажем, первые 10 документов.
+        // next возвращает последний из найденных документов
+        .next()
+        .then((product) => {
+          console.log(product)
+          return product
+        })
+        .catch((err) => console.log('Error from Product.findById: ', err))
+    )
+  }
+}
+
+module.exports = Product
+
+/*
+/////////////////////////////////// ВАРИНАТ Sequelize //////////////////////////
+/// Ниже представлен второй вариант кода для работы с sql БД через Sequelize
 const Sequelize = require('sequelize')
 
 const sequelize = require('../util/database')
@@ -29,7 +95,11 @@ const Product = sequelize.define('product', {
 
 module.exports = Product
 
+
+*/
+
 /*
+/////////////////////////////////// ВАРИНАТ SQL ////////////////////////////////
 /// Ниже представлен второй вариант кода для работы с sql БД напрямую
 const db = require('../util/database')
 
