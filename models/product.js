@@ -2,19 +2,31 @@ const mongodb = require('mongodb')
 const getDb = require('../util/database').getDb
 
 class Product {
-  constructor(title, price, description, imageUrl) {
+  constructor(title, price, description, imageUrl, id) {
     this.title = title
     this.price = price
     this.description = description
     this.imageUrl = imageUrl
+    // _id Добавили для возможности обновления продукта
+    this._id = id ? new mongodb.ObjectId(id) : null
   }
 
+  // Метод для сохранения в БД нового объекта и редактирования существующего
   save() {
     const db = getDb()
+    let dbOperation
 
-    return db
-      .collection('products')
-      .insertOne(this)
+    if (this._id) {
+      // Елси _id есть, то обновляем продукт (произошло редактирование Edit)
+      // Монго автоматически формирует _id, но это не JS-тип. Это спец объект ObjectId. Поэтому надо в качестве id передавать сущность класса ObjectId
+      // $set - что изменить в документе
+      dbOperation = db.collection('products').updateOne({ _id: this._id }, { $set: this })
+    } else {
+      // Если _id нет, тогда создаем новый продукт
+      dbOperation = db.collection('products').insertOne(this)
+    }
+
+    return dbOperation
       .then((result) => {
         console.log('Result from save', result)
       })
@@ -56,6 +68,18 @@ class Product {
         })
         .catch((err) => console.log('Error from Product.findById: ', err))
     )
+  }
+
+  static deleteById(prodId) {
+    const db = getDb()
+
+    return db
+      .collection('products')
+      .deleteOne({ _id: new mongodb.ObjectId(prodId) })
+      .then(() => {
+        console.log('Deleted')
+      })
+      .catch((err) => console.log('Error from Product.deleteById: ', err))
   }
 }
 
