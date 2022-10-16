@@ -2,13 +2,15 @@ const mongodb = require('mongodb')
 const getDb = require('../util/database').getDb
 
 class Product {
-  constructor(title, price, description, imageUrl, id) {
+  constructor(title, price, description, imageUrl, prodId, userId) {
     this.title = title
     this.price = price
     this.description = description
     this.imageUrl = imageUrl
     // _id Добавили для возможности обновления продукта
-    this._id = id ? new mongodb.ObjectId(id) : null
+    this._id = prodId ? new mongodb.ObjectId(prodId) : null
+    // Для понимания, какой пользователь создал объект
+    this.userId = userId
   }
 
   // Метод для сохранения в БД нового объекта и редактирования существующего
@@ -60,7 +62,7 @@ class Product {
         // Монго автоматически формирует _id, но это не JS-тип. Это спец объект ObjectId. Поэтому надо в качестве id передавать сущность класса ObjectId
         .find({ _id: new mongodb.ObjectId(prodId) })
         // Cursor – объект, возвращаемый из коллекции, например, методом find. Из коллекции может вернуться миллион документов. Но все они нам не нужны. Поэтому мы получаем Курсор, который поможет нам пройтись по этому объекту и получить, скажем, первые 10 документов.
-        // next возвращает последний из найденных документов
+        // next возвращает первый (или последний?) из найденных документов
         .next()
         .then((product) => {
           console.log(product)
