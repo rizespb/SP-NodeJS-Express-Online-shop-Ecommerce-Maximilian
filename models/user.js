@@ -91,6 +91,26 @@ class User {
       })
   }
 
+  deleteItemFromCart(productId) {
+    const updatedCartItems = this.cart.items.filter((item) => {
+      // Чтобы убедиться, что оба id имееют один тип, приводим их к строке
+      return item.productId.toString() !== productId.toString()
+    })
+
+    const db = getDb()
+
+    return db.collection('users').updateOne(
+      { _id: new ObjectId(this._id) },
+      {
+        // На найденном по ID документе user в БД мы обновляем только одно поле cart
+        // Т.е. в set передаем объект с полями, которые надо обновить
+        $set: {
+          cart: { items: updatedCartItems },
+        },
+      }
+    )
+  }
+
   static findById(userId) {
     const db = getDb()
 

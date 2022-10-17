@@ -79,14 +79,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 
   // Мы добавили объект user в запрос res в middleWare в app.js
   req.user
-    .getCart()
-    .then((cart) => {
-      return cart.getProducts({ where: { id: prodId } })
-    })
-    .then((products) => {
-      const product = products[0]
-      return product.cartItem.destroy()
-    })
+    .deleteItemFromCart(prodId)
     .then((result) => {
       res.redirect('/cart')
     })
