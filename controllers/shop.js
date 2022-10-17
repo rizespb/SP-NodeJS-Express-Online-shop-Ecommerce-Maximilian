@@ -70,49 +70,12 @@ exports.getCart = (req, res, next) => {
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId
 
-  let fetchedCart
-
-  let newQuantity = 1
-
-  // Мы добавили объект user в запрос res в middleWare в app.js
-  req.user
-    .getCart()
-    .then((cart) => {
-      fetchedCart = cart
-
-      // Метод getCart у юзеров после установления связей в app.js Cart.belongsTo(User)
-      return cart.getProducts({ where: { id: prodId } })
-    })
-    .then((products) => {
-      let product
-
-      if (products.length > 0) {
-        product = products[0]
-      }
-
-      if (product) {
-        const oldQuantity = product.cartItem.quantity
-
-        newQuantity = oldQuantity + 1
-
-        return product
-      }
-
-      // Ищем продукт по primary key в таблице Product
-      return Product.findByPk(prodId)
-    })
+  Product.findById(prodId)
     .then((product) => {
-      return fetchedCart.addProduct(product, {
-        through: {
-          quantity: newQuantity,
-        },
-      })
+      return req.user.addToCart(product)
     })
-    .then(() => {
-      res.redirect('/cart')
-    })
-    .catch((err) => {
-      console.log('Error from postCart: ', err)
+    .then((result) => {
+      console.log(result)
     })
 }
 

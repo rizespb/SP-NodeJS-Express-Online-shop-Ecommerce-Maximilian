@@ -27,12 +27,10 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use((req, res, next) => {
   User.findById('634beefab97907ee68be5ad6')
     .then((user) => {
-      req.user = user
-
-      console.log('USER!!!!!!!!!!!!!!!!!!!!!', user)
+      req.user = new User(user.name, user.email, user.cart, user._id)
       next()
     })
-    .catch((err) => console.log('Error from app.js app.use(user): ', err))
+    .catch((err) => console.log('Error from app.js app.use(): ', err))
 })
 
 app.use('/admin', adminRoutes)
