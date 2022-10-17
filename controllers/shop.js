@@ -94,37 +94,12 @@ exports.postOrder = (req, res, next) => {
 
   // Мы добавили объект user в запрос res в middleWare в app.js
   req.user
-    .getCart()
-    .then((cart) => {
-      fetchedCart = cart
-      return cart.getProducts()
-    })
-    .then((products) => {
-      return req.user
-        .createOrder()
-        .then((order) => {
-          // Добавляем в заказ продукт из корзины, предварительно добавляя количество этого продукта в корзине
-          return order.addProducts(
-            products.map((product) => {
-              product.orderItem = { quantity: product.cartItem.quantity }
-
-              return product
-            })
-          )
-        })
-        .then((result) => {
-          // Очищаем корзину после формирования заказа
-          return fetchedCart.setProducts(null)
-        })
-        .then((result) => {
-          res.redirect('/orders')
-        })
-        .catch((err) => {
-          console.log('Error from req.user.createOrder: ', err)
-        })
+    .addOrder()
+    .then((result) => {
+      res.redirect('/orders')
     })
     .catch((err) => {
-      console.log('Error from postOrder: ', err)
+      console.log('Error from controller shop postOrder: ', err)
     })
 }
 

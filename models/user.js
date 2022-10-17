@@ -111,6 +111,49 @@ class User {
     )
   }
 
+  addOrder() {
+    const db = getDb()
+
+    // Добавляем доп данные в заказ: данные о user, расширенные данные о товарах (название и пр.)
+    return (
+      this.getCart()
+        .then((products) => {
+          const order = {
+            items: products,
+            user: {
+              _id: new ObjectId(this._id),
+              name: this.name,
+            },
+          }
+
+          return db.collection('orders').insertOne(order)
+        })
+        // Очищаем корзину после формирования заказа
+        .then((result) => {
+          this.cart = {
+            items: [],
+          }
+
+          return db.collection('users').updateOne(
+            { _id: new ObjectId(this._id) },
+            {
+              // На найденном по ID документе user в БД мы обновляем только одно поле cart
+              // Т.е. в set передаем объект с полями, которые надо обновить
+              $set: {
+                cart: { items: [] },
+              },
+            }
+          )
+        })
+    )
+  }
+
+  getOrders() {
+    const db = getDb()
+
+    // return db.collection('orders').
+  }
+
   static findById(userId) {
     const db = getDb()
 
