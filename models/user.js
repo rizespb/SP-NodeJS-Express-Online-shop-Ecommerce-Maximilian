@@ -19,6 +19,7 @@ class User {
 
   addToCart(product) {
     const cartProductIndex = this.cart.items.findIndex((cartProduct) => {
+      // Чтобы убедиться, что оба id имееют один тип, приводим их к строке
       return cartProduct.productId.toString() === product._id.toString()
     })
 
@@ -54,6 +55,40 @@ class User {
         },
       }
     )
+  }
+
+  getCart() {
+    const db = getDb()
+
+    const productIds = this.cart.items.map((item) => {
+      return item.productId
+    })
+
+    // Получение всех продуктов, чей ID содержится в массиве $in
+    // Получаем в виде объекта cursor, который трансформируем с помощью toArray()
+    return db
+      .collection('products')
+      .find({
+        _id: {
+          $in: productIds,
+        },
+      })
+      .toArray()
+      .then((products) => {
+        // Добавляем в каждый продукт количество этого продукта в корзине
+        return products.map((product) => {
+          // Возвращаем объект продукта с количеством этого продукта в корзине
+          return {
+            ...product,
+            // Получаем количество продукта в корзине
+            quantity: this.cart.items.find((item) => {
+              // Чтобы убедиться, что оба id имееют один тип, приводим их к строке
+              return item.productId.toString() === product._id.toString()
+            }).quantity,
+            //
+          }
+        })
+      })
   }
 
   static findById(userId) {

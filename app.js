@@ -27,6 +27,8 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use((req, res, next) => {
   User.findById('634beefab97907ee68be5ad6')
     .then((user) => {
+        // На основании данных из БД мы создаем JS-объект user, в котором будут хранится те же данные, что и в БД (имя, фамилия, id)
+        // Чтобы иметь возможность легко работать с ним в JS
       req.user = new User(user.name, user.email, user.cart, user._id)
       next()
     })

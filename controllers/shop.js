@@ -47,22 +47,15 @@ exports.getCart = (req, res, next) => {
   // Метод getCart у юзеров после установления связей в app.js Cart.belongsTo(User)
   req.user
     .getCart()
-    .then((cart) => {
-      return cart
-        .getProducts()
-        .then((products) => {
-          res.render('shop/cart', {
-            pageTitle: 'Your cart',
-            path: '/cart',
-            products: products,
-          })
-        })
-        .catch((err) => {
-          console.log('Error from cart.getProducts: ', err)
-        })
+    .then((products) => {
+      res.render('shop/cart', {
+        pageTitle: 'Your cart',
+        path: '/cart',
+        products: products,
+      })
     })
     .catch((err) => {
-      console.log('Error from getCart: ', err)
+      console.log('Error from controllers.shop getCart: ', err)
     })
 }
 
@@ -76,6 +69,7 @@ exports.postCart = (req, res, next) => {
     })
     .then((result) => {
       console.log(result)
+      res.redirect('/cart')
     })
 }
 
