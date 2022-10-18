@@ -40,7 +40,8 @@ exports.postAddProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  // find - метод из mongoose
+  Product.find()
     .then((products) => {
       res.render('admin/products', {
         prods: products,
@@ -92,11 +93,16 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl
   const updatedDesc = req.body.description
 
-  // Добавление _id пятым параметром сигнализиррует методу save, что это обновление продукта, а не создание нового
-  const product = new Product(updatedTitle, updatedPrice, updatedDesc, updatedImageUrl, prodId)
+  Product.findById(prodId)
+    // Мы получили product и благодаря mongoose можем мутировать этот объек, а потом вызвать save()
+    .then((product) => {
+      product.title = updatedTitle
+      product.price = updatedPrice
+      product.description = updatedDesc
+      product.imageUrl = updatedImageUrl
 
-  product
-    .save()
+      return product.save()
+    })
     .then(() => {
       console.log('UPDATED PRODUCT')
       res.redirect('/admin/products')
@@ -109,7 +115,8 @@ exports.postEditProduct = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId
 
-  Product.deleteById(prodId)
+  // findByIdAndRemove - метод из mongoose
+  Product.findByIdAndRemove(prodId)
     .then(() => {
       console.log('DESTROYED PRODUCT')
       res.redirect('/admin/products')
