@@ -23,6 +23,7 @@ const userSchema = new Schema({
   },
 })
 
+// Добавление товара в корзину
 userSchema.methods.addToCart = function (product) {
   const cartProductIndex = this.cart.items.findIndex((cartProduct) => {
     // Чтобы убедиться, что оба id имееют один тип, приводим их к строке
@@ -51,6 +52,17 @@ userSchema.methods.addToCart = function (product) {
 
   this.cart = updatedCart
 
+  return this.save()
+}
+
+// Удаление товара из корзины
+userSchema.methods.removeFromCart = function (productId) {
+  const updatedCartItems = this.cart.items.filter((item) => {
+    // Чтобы убедиться, что оба id имееют один тип, приводим их к строке
+    return item.productId.toString() !== productId.toString()
+  })
+
+  this.cart.items = updatedCartItems
   return this.save()
 }
 
