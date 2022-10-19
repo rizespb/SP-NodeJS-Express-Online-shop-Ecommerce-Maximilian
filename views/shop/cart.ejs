@@ -10,14 +10,14 @@
                         <% products.forEach(product=> { %>
                             <li class="cart__item">
                                 <h1>
-                                    <%= product.title %>
+                                    <%= product.productId.title %>
                                 </h1>
                                 <h2>Quantity: <%= product.quantity %>
                                 </h2>
 
                                 <form action="/cart-delete-item" method="POST">
                                     <!-- input с type=hidden добавляется для того, чтобы его не было видно на странице, но value из него можно было передать при отправке формы -->
-                                    <input type="hidden" value="<%= product._id %>" name="productId">
+                                    <input type="hidden" value="<%= product.productId._id %>" name="productId">
                                     <button class="btn danger" type="submit">Delete</button>
                                 </form>
                             </li>

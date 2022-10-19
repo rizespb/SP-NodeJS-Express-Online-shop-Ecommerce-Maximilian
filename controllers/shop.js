@@ -50,8 +50,11 @@ exports.getCart = (req, res, next) => {
   // Мы добавили объект user в запрос res в middleWare в app.js
   // Метод getCart у юзеров после установления связей в app.js Cart.belongsTo(User)
   req.user
-    .getCart()
-    .then((products) => {
+    // Наполнить поле productId данными о связанном объекте
+    .populate('cart.items.productId')
+    .then((user) => {
+      const products = user.cart.items
+
       res.render('shop/cart', {
         pageTitle: 'Your cart',
         path: '/cart',
