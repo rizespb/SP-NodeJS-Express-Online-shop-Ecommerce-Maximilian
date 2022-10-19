@@ -23,4 +23,35 @@ const userSchema = new Schema({
   },
 })
 
+userSchema.methods.addToCart = function (product) {
+  const cartProductIndex = this.cart.items.findIndex((cartProduct) => {
+    // Чтобы убедиться, что оба id имееют один тип, приводим их к строке
+    return cartProduct.productId.toString() === product._id.toString()
+  })
+
+  let newQuantity = 1
+  const updatedCartItems = [...this.cart.items]
+
+  // Если в корзине уже есть товар, то увеличиваем количество на 1
+  // Если нет, то newQuantity = 1
+  if (cartProductIndex >= 0) {
+    newQuantity = this.cart.items[cartProductIndex].quantity + 1
+
+    updatedCartItems[cartProductIndex].quantity = newQuantity
+  } else {
+    updatedCartItems.push({
+      productId: product._id,
+      quantity: newQuantity,
+    })
+  }
+
+  const updatedCart = {
+    items: updatedCartItems,
+  }
+
+  this.cart = updatedCart
+
+  return this.save()
+}
+
 module.exports = mongoose.model('User', userSchema)
