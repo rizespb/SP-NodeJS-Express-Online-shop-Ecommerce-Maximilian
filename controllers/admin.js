@@ -25,6 +25,7 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     imageUrl: imageUrl,
+    userId: req.user._id,
   })
 
   product
@@ -42,7 +43,15 @@ exports.postAddProduct = (req, res, next) => {
 exports.getProducts = (req, res, next) => {
   // find - метод из mongoose
   Product.find()
+    // select - для найденных элементов получить только указанные поля - title price
+    // минус "-" перед _id - удалить данные об _id из полученных объектов
+    .select('title price -_id')
+    // populate - если установлена связь между объектами, то по указанному полю мы получим все данные о связанном объекте в поле userId
+    // .populate('userId')
+    // Или вторым параметром можем указать, какие именно данные о связанном оюъекте мы хотим получить
+    .populate('userId', 'name')
     .then((products) => {
+      console.log(products)
       res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',

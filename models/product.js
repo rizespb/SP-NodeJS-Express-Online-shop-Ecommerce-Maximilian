@@ -20,6 +20,13 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
+  // Устанавливаем связи
+  userId: {
+    type: Schema.Types.ObjectId,
+    // Указываем, с какой моделью связана модель Product
+    ref: 'User',
+    required: true,
+  },
 })
 
 // 1st - Model name

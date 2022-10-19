@@ -15,7 +15,8 @@ const userSchema = new Schema({
     items: [
       {
         // productId - id продукта, которое создается автоматически Mongo и обуспечит в дальнейшем связь между документами в коллекциях
-        productId: { type: Schema.Types.ObjectId, required: true },
+        // ref - ссылка на модель, с которой устанвлена связь
+        productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
         quantity: { type: Number, required: true },
       },
     ],
