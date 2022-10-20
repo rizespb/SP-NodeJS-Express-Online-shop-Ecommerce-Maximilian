@@ -16,6 +16,7 @@ app.set('views', 'views')
 
 const adminRoutes = require('./routes/admin')
 const shopRoutes = require('./routes/shop')
+const authRoutes = require('./routes/auth')
 
 // Регистрируем парсер для body
 // Теперь для каждого входящего запроса будет осуществляться парсинг body перед применением остальных middleware
@@ -36,6 +37,7 @@ app.use((req, res, next) => {
 
 app.use('/admin', adminRoutes)
 app.use(shopRoutes)
+app.use(authRoutes)
 
 // Если к этому моменту мы не нашли никакого совпадающего роута, тогда вернем в ответе 404 страницу
 app.use(errorController.get404)

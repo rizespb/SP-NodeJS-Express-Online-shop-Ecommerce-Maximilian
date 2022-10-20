@@ -1,0 +1,26 @@
+<!-- Будет использоваться и для добавления продукта, и для редактирования -->
+<!-- Поэтому, в зависимости от того, находимся ли мы в режиме editMode или нет, мы выводим начальные значения в input, меняем текст кнопки и саму форму сабмитиим на разные урлы - /admin/edit-product или /admin/add-product -->
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/auth.css">
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+
+            <main>
+                <form class="login-form" action="/login" method="POST">
+                    <div class="form-control">
+                        <label for="email">E-Mail</label>
+                        <input type="email" name="email" id="email">
+                    </div>
+                    <div class="form-control">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password">
+                    </div>
+
+
+                    <button class="btn" type="submit">Login</button>
+                </form>
+            </main>
+            <%- include('../includes/end.ejs') %>
