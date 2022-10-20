@@ -133,10 +133,9 @@ exports.postOrder = (req, res, next) => {
     })
 }
 
+// Получение списка заказов для конкретного пользователя
 exports.getOrders = (req, res, next) => {
-  // Мы добавили объект user в запрос res в middleWare в app.js
-  req.user
-    .getOrders()
+  Order.find({ 'user.userId': req.user._id })
     .then((orders) => {
       //   console.log(orders[0].products[0].orderItem)
       res.render('shop/orders', {
