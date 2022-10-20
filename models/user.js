@@ -66,4 +66,10 @@ userSchema.methods.removeFromCart = function (productId) {
   return this.save()
 }
 
+// Очистка корзины после формирования заказа
+userSchema.methods.clearCart = function () {
+  this.cart = { items: [] }
+  return this.save()
+}
+
 module.exports = mongoose.model('User', userSchema)

@@ -1,4 +1,5 @@
 const Product = require('../models/product')
+const Order = require('../models/Order')
 
 exports.getProducts = (req, res, next) => {
   // find - метод из mongoose
@@ -97,12 +98,34 @@ exports.postCartDeleteProduct = (req, res, next) => {
 
 // Создать заказ
 exports.postOrder = (req, res, next) => {
-  let fetchedCart
-
-  // Мы добавили объект user в запрос res в middleWare в app.js
   req.user
-    .addOrder()
+    // Наполнить поле productId данными о связанном объекте
+    .populate('cart.items.productId')
+    .then((user) => {
+      const products = user.cart.items.map((item) => {
+        return {
+          quantity: item.quantity,
+          // _doc позволит нам получить все данные по связонному продукту
+          product: { ...item.productId._doc },
+        }
+      })
+
+      const order = new Order({
+        user: {
+          // Мы добавили объект user в запрос res в middleWare в app.js
+          name: req.user.name,
+          // Mongoose сам вытащит из user его _id
+          userId: req.user,
+        },
+        products: products,
+      })
+
+      return order.save()
+    })
     .then((result) => {
+      return req.user.clearCart()
+    })
+    .then(() => {
       res.redirect('/orders')
     })
     .catch((err) => {
