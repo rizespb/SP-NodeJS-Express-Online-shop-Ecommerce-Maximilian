@@ -46,11 +46,11 @@ exports.getProducts = (req, res, next) => {
   Product.find()
     // select - для найденных элементов получить только указанные поля - title price
     // минус "-" перед _id - удалить данные об _id из полученных объектов
-    .select('title price -_id')
+    // .select('title price -_id')
     // populate - если установлена связь между объектами, то по указанному полю мы получим все данные о связанном объекте в поле userId
     // .populate('userId')
     // Или вторым параметром можем указать, какие именно данные о связанном оюъекте мы хотим получить
-    .populate('userId', 'name')
+    // .populate('userId', 'name')
     .then((products) => {
       console.log(products)
       res.render('admin/products', {
@@ -88,6 +88,7 @@ exports.getEditProduct = (req, res, next) => {
         // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
         editing: editMode,
         product: product,
+        isAuthenticated: req.session.isLoggedIn,
       })
     })
     .catch((err) => {

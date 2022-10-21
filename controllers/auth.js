@@ -9,12 +9,20 @@ exports.getLogin = (req, res, next) => {
 }
 
 exports.postLogin = (req, res, next) => {
+    // Когда мы сохраняем в объект session (который предоставляется пакетом 'express-session') что-либо на фронте создается кука с идентификатором сессии и происходит синхронизация с Монго
   User.findById('634ec2cb03f75fdfb8298fc7')
     .then((user) => {
       // Объект user вместе с запросом будет прокинут по всем остальным middleware в приложении
       req.session.user = user
       req.session.isLoggedIn = true
-      res.redirect('/')
+
+      // Т.к. при сохранении user и isLoggedIn в session происходит синхронизация с Монго, это может занять время и при редиректе мы увидим еще не обновленные данные
+      // Вызывать метод save необязательно, но это гарантирует, что при редиректе пользователь увидит обновленные данные
+      req.session.save((err) => {
+        console.log('Error from postLogin req.session.save(): ', err)
+
+        res.redirect('/')
+      })
     })
     .catch((err) => console.log('Error from app.js app.use(): ', err))
 }
