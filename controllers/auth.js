@@ -1,11 +1,8 @@
 exports.getLogin = (req, res, next) => {
-  console.log(req.session.isLoggedIn)
-
   res.render('auth/login', {
     pageTitle: 'Login',
     path: '/login',
-    // isAuthenticated: isLoggedIn,
-    isAuthenticated: false,
+    isAuthenticated: req.session.isLoggedIn,
   })
 }
 
@@ -14,4 +11,15 @@ exports.postLogin = (req, res, next) => {
   req.session.isLoggedIn = true
 
   res.redirect('/')
+}
+
+// Удаление сессии
+exports.postLogout = (req, res, next) => {
+  // Если будет ошибка, ее передадут в колбэк, который будет вызван после удаления сессии
+  // destroy предоставляется библиотекой
+  req.session.destroy((err) => {
+    console.log(err)
+
+    res.redirect('/')
+  })
 }
