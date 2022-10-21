@@ -4,12 +4,20 @@ exports.getLogin = (req, res, next) => {
   res.render('auth/login', {
     pageTitle: 'Login',
     path: '/login',
-    isAuthenticated: req.session.isLoggedIn,
+    isAuthenticated: false,
+  })
+}
+
+exports.getSignup = (req, res, next) => {
+  res.render('auth/signup', {
+    pageTitle: 'Sign up',
+    path: '/signup',
+    isAuthenticated: false,
   })
 }
 
 exports.postLogin = (req, res, next) => {
-    // Когда мы сохраняем в объект session (который предоставляется пакетом 'express-session') что-либо на фронте создается кука с идентификатором сессии и происходит синхронизация с Монго
+  // Когда мы сохраняем в объект session (который предоставляется пакетом 'express-session') что-либо на фронте создается кука с идентификатором сессии и происходит синхронизация с Монго
   User.findById('634ec2cb03f75fdfb8298fc7')
     .then((user) => {
       // Объект user вместе с запросом будет прокинут по всем остальным middleware в приложении
@@ -26,6 +34,9 @@ exports.postLogin = (req, res, next) => {
     })
     .catch((err) => console.log('Error from app.js app.use(): ', err))
 }
+
+// Регистрация
+exports.postSignup = (req, res, next) => {}
 
 // Удаление сессии
 exports.postLogout = (req, res, next) => {
