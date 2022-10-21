@@ -53,15 +53,19 @@ app.use(
   })
 )
 
-// app.use((req, res, next) => {
-//   User.findById('634ec2cb03f75fdfb8298fc7')
-//     .then((user) => {
-//       // Объект user вместе с запросом будет прокинут по всем остальным middleware в приложении
-//       req.user = user
-//       next()
-//     })
-//     .catch((err) => console.log('Error from app.js app.use(): ', err))
-// })
+app.use((req, res, next) => {
+  if (!req.session.user) {
+    return next()
+  }
+
+  User.findById(req.session.user._id)
+    .then((user) => {
+      req.user = user
+
+      next()
+    })
+    .catch((err) => console.log('Error from app.js app.use(): ', err))
+})
 
 app.use('/admin', adminRoutes)
 app.use(shopRoutes)

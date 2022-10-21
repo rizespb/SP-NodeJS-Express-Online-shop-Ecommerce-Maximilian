@@ -1,3 +1,5 @@
+const User = require('../models/user')
+
 exports.getLogin = (req, res, next) => {
   res.render('auth/login', {
     pageTitle: 'Login',
@@ -7,10 +9,14 @@ exports.getLogin = (req, res, next) => {
 }
 
 exports.postLogin = (req, res, next) => {
-  // isLoggedIn - любое имя
-  req.session.isLoggedIn = true
-
-  res.redirect('/')
+  User.findById('634ec2cb03f75fdfb8298fc7')
+    .then((user) => {
+      // Объект user вместе с запросом будет прокинут по всем остальным middleware в приложении
+      req.session.user = user
+      req.session.isLoggedIn = true
+      res.redirect('/')
+    })
+    .catch((err) => console.log('Error from app.js app.use(): ', err))
 }
 
 // Удаление сессии
