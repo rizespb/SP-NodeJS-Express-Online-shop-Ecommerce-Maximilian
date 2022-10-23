@@ -7,6 +7,9 @@ const session = require('express-session')
 // session передаем в качестве параметра в след строке
 const MongoDBStore = require('connect-mongodb-session')(session)
 
+// Защита от Cross-Site Request Forgery атак – межсайтовая подделка запроса
+const csrf = require('csurf')
+
 const errorController = require('./controllers/error')
 const User = require('./models/user')
 
@@ -22,6 +25,10 @@ const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: 'sessions',
 })
+
+// Инициализация защиты от CSRF-атак
+// Можно добавить настройки, но и по дефолту работает ок
+const csrfProtection = csrf({})
 
 // Говорим, что будем использовать ejs
 app.set('view engine', 'ejs')
@@ -53,6 +60,10 @@ app.use(
   })
 )
 
+// Обязательно после инициализации сессии это делать
+app.use(csrfProtection)
+
+// Получаем пользователя, если он авторизован
 app.use((req, res, next) => {
   if (!req.session.user) {
     return next()
@@ -65,6 +76,14 @@ app.use((req, res, next) => {
       next()
     })
     .catch((err) => console.log('Error from app.js app.use(): ', err))
+})
+
+// Этот middleware пробрасывает во ВСЕ view, которые будет возвращать сервер в res.render указанные в locals переменные
+// Он не имеет прямого отношения к библиотеке csurf
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn
+  res.locals.csrfToken = req.csrfToken()
+  next()
 })
 
 app.use('/admin', adminRoutes)

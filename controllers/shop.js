@@ -2,7 +2,7 @@ const Product = require('../models/product')
 const Order = require('../models/Order')
 
 exports.getProducts = (req, res, next) => {
-    // find - метод из mongoose
+  // find - метод из mongoose
   Product.find()
     .then((products) => {
       res.render('shop/product-list', {
@@ -41,7 +41,6 @@ exports.getIndex = (req, res, next) => {
         prods: products,
         pageTitle: 'Shop',
         path: '/',
-        isAuthenticated: req.session.isLoggedIn,
       })
     })
     .catch((err) => {
@@ -116,7 +115,7 @@ exports.postOrder = (req, res, next) => {
       const order = new Order({
         user: {
           // Мы добавили объект user в запрос res в middleWare в app.js
-          name: req.user.name,
+          email: req.user.email,
           // Mongoose сам вытащит из user его _id
           userId: req.user,
         },

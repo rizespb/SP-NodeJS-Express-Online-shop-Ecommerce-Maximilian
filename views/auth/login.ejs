@@ -19,6 +19,8 @@
                         <input type="password" name="password" id="password">
                     </div>
 
+                    <!-- Токен для защиты от CSRF-атак (межсайтовая подделка запроса) name="_csrf" - такое имя в body post-запроса будет искать библиотека csurf -->
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
                     <button class="btn" type="submit">Login</button>
                 </form>

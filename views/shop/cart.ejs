@@ -18,6 +18,10 @@
                                 <form action="/cart-delete-item" method="POST">
                                     <!-- input с type=hidden добавляется для того, чтобы его не было видно на странице, но value из него можно было передать при отправке формы -->
                                     <input type="hidden" value="<%= product.productId._id %>" name="productId">
+
+                                    <!-- Токен для защиты от CSRF-атак (межсайтовая подделка запроса) name="_csrf" - такое имя в body post-запроса будет искать библиотека csurf -->
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
                                     <button class="btn danger" type="submit">Delete</button>
                                 </form>
                             </li>
@@ -28,6 +32,9 @@
 
                     <div class="centered">
                         <form action="/create-order" method="post">
+                            <!-- Токен для защиты от CSRF-атак (межсайтовая подделка запроса) name="_csrf" - такое имя в body post-запроса будет искать библиотека csurf -->
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
                             <button type="submit" class="btn">Order
                                 Now!</button>
                         </form>
