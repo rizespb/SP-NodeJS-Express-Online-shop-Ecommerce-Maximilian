@@ -1,6 +1,11 @@
 const Product = require('../models/product')
 
 exports.getAddProduct = (req, res, next) => {
+  // private route
+  if (!req.session.isLoggedIn) {
+    return res.redirect('/login')
+  }
+
   // Метод render добавляется движком шаблонизатора
   // edit-product - универсальная форма для добавления или роедактирования продукта
   res.render('admin/edit-product', {
