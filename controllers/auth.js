@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs')
+
 const User = require('../models/user')
 
 exports.getLogin = (req, res, next) => {
@@ -16,27 +18,80 @@ exports.getSignup = (req, res, next) => {
   })
 }
 
+// Авторизация
 exports.postLogin = (req, res, next) => {
-  // Когда мы сохраняем в объект session (который предоставляется пакетом 'express-session') что-либо на фронте создается кука с идентификатором сессии и происходит синхронизация с Монго
-  User.findById('634ec2cb03f75fdfb8298fc7')
+  const email = req.body.email
+  const password = req.body.password
+
+  User.findOne({ email: email })
     .then((user) => {
-      // Объект user вместе с запросом будет прокинут по всем остальным middleware в приложении
-      req.session.user = user
-      req.session.isLoggedIn = true
+      if (!user) {
+        return res.redirect('/login')
+      }
 
-      // Т.к. при сохранении user и isLoggedIn в session происходит синхронизация с Монго, это может занять время и при редиректе мы увидим еще не обновленные данные
-      // Вызывать метод save необязательно, но это гарантирует, что при редиректе пользователь увидит обновленные данные
-      req.session.save((err) => {
-        console.log('Error from postLogin req.session.save(): ', err)
+      bcrypt
+        .compare(password, user.password)
+        .then((doMatch) => {
+          // doMatch - булево - соправл хэш или нет
+          if (doMatch) {
+            // Когда мы сохраняем в объект session (который предоставляется пакетом 'express-session') что-либо на фронте создается кука с идентификатором сессии и происходит синхронизация с Монго
+            // Объект user вместе с запросом будет прокинут по всем остальным middleware в приложении
+            req.session.user = user
+            req.session.isLoggedIn = true
 
-        res.redirect('/')
-      })
+            // Т.к. при сохранении user и isLoggedIn в session происходит синхронизация с Монго, это может занять время и при редиректе мы увидим еще не обновленные данные
+            // Вызывать метод save необязательно, но это гарантирует, что при редиректе пользователь увидит обновленные данные
+            return req.session.save((err) => {
+              console.log('Error from postLogin req.session.save(): ', err)
+
+              return res.redirect('/')
+            })
+          }
+
+          res.redirect('/login')
+        })
+        .catch((err) => {
+          console.log('Error from postLogin bcrypt.compare: ', err)
+
+          res.redirect('/login')
+        })
     })
-    .catch((err) => console.log('Error from app.js app.use(): ', err))
+    .catch((err) => console.log('Error from postLogin: ', err))
 }
 
 // Регистрация
-exports.postSignup = (req, res, next) => {}
+exports.postSignup = (req, res, next) => {
+  const email = req.body.email
+  const password = req.body.password
+  const confirmPassword = req.body.confirmPassword
+
+  // Проверяем, не занят ли такой емейл
+  User.findOne({ email: email })
+    .then((userDoc) => {
+      if (userDoc) {
+        return res.redirect('/signup')
+      }
+
+      // 1st - строка для хэширования
+      // 2st - соль
+      return bcrypt
+        .hash(password, 12)
+        .then((hashPassword) => {
+          const user = new User({
+            email: email,
+            password: hashPassword,
+            cart: { items: [] },
+          })
+
+          return user.save()
+        })
+        .then((result) => {
+          console.log('REDIRECT TO LOGIN')
+          res.redirect('/login')
+        })
+    })
+    .catch((err) => console.log('Error from postSignup: ', err))
+}
 
 // Удаление сессии
 exports.postLogout = (req, res, next) => {

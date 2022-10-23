@@ -77,23 +77,6 @@ app.use(errorController.get404)
 mongoose
   .connect(MONGODB_URI)
   .then((result) => {
-    // findOne - найдет первого пользователя в коллекции
-    // Это добавлено для того, чтобы не создавать пользователя при каждом старте
-    User.findOne().then((user) => {
-      if (!user) {
-        const user = new User({
-          name: 'Ivan',
-          email: 'ivan@test.com',
-          cart: {
-            items: [],
-          },
-        })
-
-        // save - метод из mongoose
-        user.save()
-      }
-    })
-
     app.listen(3000)
   })
   .catch((err) => console.log('Error from app.js mongoose.connect(): ', err))
