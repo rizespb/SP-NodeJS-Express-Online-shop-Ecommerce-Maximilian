@@ -11,6 +11,9 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  // Необязательный токен для сброса пароля
+  resetToken: String,
+  resetTokenExpiration: Date,
   cart: {
     items: [
       {
