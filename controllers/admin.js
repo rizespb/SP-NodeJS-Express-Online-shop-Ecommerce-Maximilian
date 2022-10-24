@@ -13,7 +13,6 @@ exports.getAddProduct = (req, res, next) => {
     path: '/admin/add-product',
     // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
     editing: false,
-    isAuthenticated: req.session.isLoggedIn,
   })
 }
 
@@ -62,7 +61,6 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: 'Admin Products',
         path: 'admin/products',
-        isAuthenticated: req.session.isLoggedIn,
       })
     })
     .catch((err) => console.log('Error from getProducts: ', err))
@@ -93,7 +91,6 @@ exports.getEditProduct = (req, res, next) => {
         // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
         editing: editMode,
         product: product,
-        isAuthenticated: req.session.isLoggedIn,
       })
     })
     .catch((err) => {
