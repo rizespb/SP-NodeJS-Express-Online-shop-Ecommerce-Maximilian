@@ -150,3 +150,20 @@ exports.postLogout = (req, res, next) => {
     res.redirect('/')
   })
 }
+
+// Сброс пароля
+exports.getReset = (req, res, next) => {
+  // message будет массивом сообщений, а не просто сообщением
+  let message = req.flash('error')
+  if (message.length > 0) {
+    message = message[0]
+  } else {
+    message = null
+  }
+
+  res.render('auth/reset', {
+    pageTitle: 'Reset password',
+    path: '/reset',
+    errorMessage: message,
+  })
+}
