@@ -10,6 +10,9 @@ const MongoDBStore = require('connect-mongodb-session')(session)
 // Защита от Cross-Site Request Forgery атак – межсайтовая подделка запроса
 const csrf = require('csurf')
 
+// Flash-сообщения - это сообщения, которые сохраняются в сессии и доступны в обработчике маршрута, на который выполняется следующий переход. Flash-сообщение удаляется из сессии после того, как оно было отображено в представлении.
+const flash = require('connect-flash')
+
 const errorController = require('./controllers/error')
 const User = require('./models/user')
 
@@ -62,6 +65,9 @@ app.use(
 
 // Обязательно после инициализации сессии это делать
 app.use(csrfProtection)
+
+// Обязательно после инициализации сессии это делать
+app.use(flash())
 
 // Получаем пользователя, если он авторизован
 app.use((req, res, next) => {

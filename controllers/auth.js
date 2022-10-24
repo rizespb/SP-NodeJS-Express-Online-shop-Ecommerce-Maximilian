@@ -6,6 +6,7 @@ exports.getLogin = (req, res, next) => {
   res.render('auth/login', {
     pageTitle: 'Login',
     path: '/login',
+    errorMessage: req.flash('error'),
   })
 }
 
@@ -24,6 +25,11 @@ exports.postLogin = (req, res, next) => {
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
+        // Сообщение, которое надо сохранить в сессии для следующего рендера
+        // 1st - ключ, по которому сохраним данные
+        // 2dn - Сообщение, которое надо передать
+        req.flash('error', 'Invalid email')
+
         return res.redirect('/login')
       }
 
