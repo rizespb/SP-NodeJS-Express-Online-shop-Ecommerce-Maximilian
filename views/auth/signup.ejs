@@ -7,24 +7,31 @@
         <%- include('../includes/navigation.ejs') %>
 
             <main>
-                <form class="login-form" action="/signup" method="POST">
-                    <div class="form-control">
-                        <label for="email">E-Mail</label>
-                        <input type="email" name="email" id="email">
+                <% if (errorMessage) { %>
+                    <div class="user-message user-message--error">
+                        <%= errorMessage %>
                     </div>
-                    <div class="form-control">
-                        <label for="password">Password</label>
-                        <input type="password" name="password" id="password">
-                    </div>
-                    <div class="form-control">
-                        <label for="confirmPassword">Confirm Password</label>
-                        <input type="password" name="confirmPassword" id="confirmPassword">
-                    </div>
+                    <% } %>
 
-                    <!-- Токен для защиты от CSRF-атак (межсайтовая подделка запроса) name="_csrf" - такое имя в body post-запроса будет искать библиотека csurf -->
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    
-                    <button class="btn" type="submit">Sign Up</button>
-                </form>
+
+                        <form class="login-form" action="/signup" method="POST">
+                            <div class="form-control">
+                                <label for="email">E-Mail</label>
+                                <input type="email" name="email" id="email">
+                            </div>
+                            <div class="form-control">
+                                <label for="password">Password</label>
+                                <input type="password" name="password" id="password">
+                            </div>
+                            <div class="form-control">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" name="confirmPassword" id="confirmPassword">
+                            </div>
+
+                            <!-- Токен для защиты от CSRF-атак (межсайтовая подделка запроса) name="_csrf" - такое имя в body post-запроса будет искать библиотека csurf -->
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                            <button class="btn" type="submit">Sign Up</button>
+                        </form>
             </main>
             <%- include('../includes/end.ejs') %>
