@@ -1,6 +1,20 @@
 const bcrypt = require('bcryptjs')
 
+// nodemailer и sendgridTransport для отправки емейлов
+const nodemailer = require('nodemailer')
+const sendgridTransport = require('nodemailer-sendgrid-transport')
+
 const User = require('../models/user')
+
+const transporter = nodemailer.createTransport(
+  sendgridTransport({
+    auth: {
+      // api_user и api_key предоставляются сервисом SendGrid
+      // api_user: some_user_name,
+      api_key: 'some_api_key_from_sendgrid',
+    },
+  })
+)
 
 exports.getLogin = (req, res, next) => {
   // message будет массивом сообщений, а не просто сообщением
@@ -111,6 +125,16 @@ exports.postSignup = (req, res, next) => {
         .then((result) => {
           console.log('REDIRECT TO LOGIN')
           res.redirect('/login')
+
+          // Отправка письма после регистрации
+          return transporter
+            .sendMail({
+              to: email,
+              from: 'shop@myshop.com',
+              subject: 'Signup succeeded',
+              html: '<h1>You successfully signed up!</h1>',
+            })
+            .catch((err) => console.log('Error from postSignup transporter.sendMail: ', err))
         })
     })
     .catch((err) => console.log('Error from postSignup: ', err))
