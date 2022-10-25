@@ -5,19 +5,34 @@ const bcrypt = require('bcryptjs')
 
 // nodemailer и sendgridTransport для отправки емейлов
 const nodemailer = require('nodemailer')
-const sendgridTransport = require('nodemailer-sendgrid-transport')
 
 const User = require('../models/user')
 
-const transporter = nodemailer.createTransport(
-  sendgridTransport({
-    auth: {
-      // api_user и api_key предоставляются сервисом SendGrid
-      // api_user: some_user_name,
-      api_key: 'some_api_key_from_sendgrid',
-    },
-  })
-)
+// Для чтения env-файлов
+const dotenv = require('dotenv')
+dotenv.config()
+
+// Для сервиса рассылок SendGrid
+// const sendgridTransport = require('nodemailer-sendgrid-transport')
+
+// const transporter = nodemailer.createTransport(
+//   sendgridTransport({
+//     auth: {
+//       // api_user и api_key предоставляются сервисом SendGrid
+//       // api_user: some_user_name,
+//       api_key: 'some_api_key_from_sendgrid',
+//     },
+//   })
+// )
+
+// Для рассылок через Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'rizespbdev@gmail.com',
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+})
 
 exports.getLogin = (req, res, next) => {
   // message будет массивом сообщений, а не просто сообщением
@@ -35,6 +50,7 @@ exports.getLogin = (req, res, next) => {
   })
 }
 
+// Получение страницы регистрации
 exports.getSignup = (req, res, next) => {
   // message будет массивом сообщений, а не просто сообщением
   let message = req.flash('error')
@@ -155,7 +171,7 @@ exports.postLogout = (req, res, next) => {
   })
 }
 
-// Сброс пароля
+// Страница сброса пароля
 exports.getReset = (req, res, next) => {
   // message будет массивом сообщений, а не просто сообщением
   let message = req.flash('error')
@@ -172,7 +188,7 @@ exports.getReset = (req, res, next) => {
   })
 }
 
-// Сброс пароля
+// Запрос на сброс пароля
 exports.postReset = (req, res, next) => {
   // Генерируем токен для сброса пароля
   crypto.randomBytes(32, (err, buffer) => {
@@ -234,6 +250,7 @@ exports.getNewPassword = (req, res, next) => {
         message = null
       }
 
+      console.log(user._id.toString())
       res.render('auth/new-password', {
         pageTitle: 'New password',
         path: '/new-password',
@@ -262,7 +279,7 @@ exports.postNewPassword = (req, res, next) => {
       return bcrypt.hash(newPassword, 12)
     })
     .then((hashedPassword) => {
-      resetUser.password = hashPassword
+      resetUser.password = hashedPassword
       resetUser.resetToken = undefined
       resetUser.resetTokenExpiration = undefined
 
