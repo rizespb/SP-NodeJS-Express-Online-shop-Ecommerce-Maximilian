@@ -47,7 +47,7 @@ exports.postAddProduct = (req, res, next) => {
 
 exports.getProducts = (req, res, next) => {
   // find - метод из mongoose
-  Product.find()
+  Product.find({ userId: req.user._id })
     // select - для найденных элементов получить только указанные поля - title price
     // минус "-" перед _id - удалить данные об _id из полученных объектов
     // .select('title price -_id')
