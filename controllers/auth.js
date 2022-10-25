@@ -172,6 +172,7 @@ exports.getReset = (req, res, next) => {
   })
 }
 
+// Сброс пароля
 exports.postReset = (req, res, next) => {
   // Генерируем токен для сброса пароля
   crypto.randomBytes(32, (err, buffer) => {
@@ -216,4 +217,61 @@ exports.postReset = (req, res, next) => {
         console.log('Error from postReset User.findOne: ', err)
       })
   })
+}
+
+// Страница для ввода нового пароля
+exports.getNewPassword = (req, res, next) => {
+  const token = req.params.token
+
+  // $gt - resetTokenExpiration должна быть больше - gt - greater - чем текущий момент времени
+  User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
+    .then((user) => {
+      // message будет массивом сообщений, а не просто сообщением
+      let message = req.flash('error')
+      if (message.length > 0) {
+        message = message[0]
+      } else {
+        message = null
+      }
+
+      res.render('auth/new-password', {
+        pageTitle: 'New password',
+        path: '/new-password',
+        errorMessage: message,
+        userId: user._id.toString(),
+        passwordToken: token,
+      })
+    })
+    .catch((err) => {
+      console.log('Error from getNewPassword User.findOne: ', err)
+    })
+}
+
+// Усатновка нового пароля
+exports.postNewPassword = (req, res, next) => {
+  const newPassword = req.body.password
+  const userId = req.body.userId
+  const passwordToken = req.body.passwordToken
+  let resetUser
+
+  // $gt - resetTokenExpiration должна быть больше - gt - greater - чем текущий момент времени
+  User.findOne({ resetToken: passwordToken, resetTokenExpiration: { $gt: Date.now() }, _id: userId })
+    .then((user) => {
+      resetUser = user
+
+      return bcrypt.hash(newPassword, 12)
+    })
+    .then((hashedPassword) => {
+      resetUser.password = hashPassword
+      resetUser.resetToken = undefined
+      resetUser.resetTokenExpiration = undefined
+
+      return resetUser.save()
+    })
+    .then((result) => {
+      res.redirect('/login')
+    })
+    .catch((err) => {
+      console.log('Error from postNewPassword User.findOne: ', err)
+    })
 }
