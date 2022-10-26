@@ -1,5 +1,8 @@
 const express = require('express')
 
+// Валидация поступающих данных
+const { check } = require('express-validator/check')
+
 const authController = require('../controllers/auth')
 
 const router = express.Router()
@@ -10,7 +13,8 @@ router.get('/signup', authController.getSignup)
 
 router.post('/login', authController.postLogin)
 
-router.post('/signup', authController.postSignup)
+// check принимает поле или массив с названиями полей, которые мы хотим валидировать. check будет искать это поле практически везде: в body, headers, в куках и пр. - и валидировать его
+router.post('/signup', check('email').isEmail().withMessage('Please enter a valid email'), authController.postSignup)
 
 router.post('/logout', authController.postLogout)
 

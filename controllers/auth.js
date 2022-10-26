@@ -6,6 +6,9 @@ const bcrypt = require('bcryptjs')
 // nodemailer и sendgridTransport для отправки емейлов
 const nodemailer = require('nodemailer')
 
+// Валидация
+const { validationResult } = require('express-validator/check')
+
 const User = require('../models/user')
 
 // Для чтения env-файлов
@@ -118,6 +121,20 @@ exports.postSignup = (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
   const confirmPassword = req.body.confirmPassword
+
+  // Ошбики валидации
+  const errors = validationResult(req)
+
+  // Если есть ошибки
+  if (!errors.isEmpty()) {
+    console.log('Validation errors array', errors.array())
+
+    return res.status(422).render('auth/signup', {
+      pageTitle: 'Sign up',
+      path: '/signup',
+      errorMessage: errors.array()[0].msg,
+    })
+  }
 
   // Проверяем, не занят ли такой емейл
   User.findOne({ email: email })
