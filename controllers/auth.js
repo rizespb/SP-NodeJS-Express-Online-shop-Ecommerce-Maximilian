@@ -67,6 +67,12 @@ exports.getSignup = (req, res, next) => {
     pageTitle: 'Sign up',
     path: '/signup',
     errorMessage: message,
+    // Предыдущие введенные значения - пустые строки для первоого посещения страницы
+    oldInput: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
   })
 }
 
@@ -74,6 +80,20 @@ exports.getSignup = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
+
+  // Ошбики валидации
+  const errors = validationResult(req)
+
+  // Если есть ошибки
+  if (!errors.isEmpty()) {
+    console.log('Validation errors array from postSignup', errors.array())
+
+    return res.status(422).render('auth/login', {
+      pageTitle: 'Login',
+      path: '/login',
+      errorMessage: errors.array()[0].msg,
+    })
+  }
 
   User.findOne({ email: email })
     .then((user) => {
@@ -132,6 +152,12 @@ exports.postSignup = (req, res, next) => {
       pageTitle: 'Sign up',
       path: '/signup',
       errorMessage: errors.array()[0].msg,
+      // Предыдущие введенные значения
+      oldInput: {
+        email: email,
+        password: password,
+        confirmPassword: req.body.confirmPassword,
+      },
     })
   }
 
@@ -163,7 +189,6 @@ exports.postSignup = (req, res, next) => {
     .catch((err) => {
       console.log('Error from postSignup transporter.sendMail: ', err)
     })
-    
 }
 
 // Удаление сессии
