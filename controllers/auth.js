@@ -120,14 +120,13 @@ exports.postLogin = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
-  const confirmPassword = req.body.confirmPassword
 
   // Ошбики валидации
   const errors = validationResult(req)
 
   // Если есть ошибки
   if (!errors.isEmpty()) {
-    console.log('Validation errors array', errors.array())
+    console.log('Validation errors array from postSignup', errors.array())
 
     return res.status(422).render('auth/signup', {
       pageTitle: 'Sign up',
@@ -136,45 +135,35 @@ exports.postSignup = (req, res, next) => {
     })
   }
 
-  // Проверяем, не занят ли такой емейл
-  User.findOne({ email: email })
-    .then((userDoc) => {
-      if (userDoc) {
-        req.flash('error', 'Email exists already, please pick a different one')
+  // 1st - строка для хэширования
+  // 2st - соль
+  return bcrypt
+    .hash(password, 12)
+    .then((hashPassword) => {
+      const user = new User({
+        email: email,
+        password: hashPassword,
+        cart: { items: [] },
+      })
 
-        return res.redirect('/signup')
-      }
-
-      // 1st - строка для хэширования
-      // 2st - соль
-      return bcrypt
-        .hash(password, 12)
-        .then((hashPassword) => {
-          const user = new User({
-            email: email,
-            password: hashPassword,
-            cart: { items: [] },
-          })
-
-          return user.save()
-        })
-        .then((result) => {
-          console.log('REDIRECT TO LOGIN')
-          res.redirect('/login')
-
-          // Отправка письма после регистрации
-          return transporter.sendMail({
-            to: email,
-            from: 'shop@myshop.com',
-            subject: 'Signup succeeded',
-            html: '<h1>You successfully signed up!</h1>',
-          })
-        })
-        .catch((err) => {
-          console.log('Error from postSignup transporter.sendMail: ', err)
-        })
+      return user.save()
     })
-    .catch((err) => console.log('Error from postSignup: ', err))
+    .then((result) => {
+      console.log('REDIRECT TO LOGIN')
+      res.redirect('/login')
+
+      // Отправка письма после регистрации
+      return transporter.sendMail({
+        to: email,
+        from: 'shop@myshop.com',
+        subject: 'Signup succeeded',
+        html: '<h1>You successfully signed up!</h1>',
+      })
+    })
+    .catch((err) => {
+      console.log('Error from postSignup transporter.sendMail: ', err)
+    })
+    
 }
 
 // Удаление сессии
