@@ -13,7 +13,14 @@ router.get('/login', authController.getLogin)
 
 router.get('/signup', authController.getSignup)
 
-router.post('/login', authController.postLogin)
+router.post(
+  '/login',
+  [
+    body('email').isEmail().withMessage('Please enter a valid email address.').normalizeEmail(),
+    body('password', 'Password has to be valid.').isLength({ min: 4 }).isAlphanumeric().trim(),
+  ],
+  authController.postLogin
+)
 
 // check принимает поле или массив с названиями полей, которые мы хотим валидировать. check будет искать это поле практически везде: в body, headers, в куках и пр. - и валидировать его
 router.post(

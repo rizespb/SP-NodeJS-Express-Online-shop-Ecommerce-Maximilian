@@ -50,6 +50,11 @@ exports.getLogin = (req, res, next) => {
     pageTitle: 'Login',
     path: '/login',
     errorMessage: message,
+    oldInput: {
+      email: '',
+      password: '',
+    },
+    validationErrors: [],
   })
 }
 
@@ -87,26 +92,37 @@ exports.postLogin = (req, res, next) => {
 
   // Если есть ошибки
   if (!errors.isEmpty()) {
-    console.log('Validation errors array from postSignup', errors.array())
+    console.log('Validation errors array from postLogin', errors.array())
 
     return res.status(422).render('auth/login', {
       pageTitle: 'Login',
       path: '/login',
       errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email: email,
+        password: password,
+      },
+      validationErrors: errors.array(),
     })
   }
 
   User.findOne({ email: email })
     .then((user) => {
+      // Если пользователь не найден, то редирект обратно на страницу /login
       if (!user) {
-        // Сообщение, которое надо сохранить в сессии для следующего рендера
-        // 1st - ключ, по которому сохраним данные
-        // 2dn - Сообщение, которое надо передать
-        req.flash('error', 'Invalid email or password')
-
-        return res.redirect('/login')
+        return res.status(422).render('auth/login', {
+          pageTitle: 'Login',
+          path: '/login',
+          errorMessage: 'Invalid email or password',
+          oldInput: {
+            email: email,
+            password: password,
+          },
+          validationErrors: [],
+        })
       }
 
+      // Если пользователь найден, сравниваем пароли с БД
       bcrypt
         .compare(password, user.password)
         .then((doMatch) => {
@@ -126,7 +142,17 @@ exports.postLogin = (req, res, next) => {
             })
           }
 
-          res.redirect('/login')
+          // Если пароль не совпал с БД
+          return res.status(422).render('auth/login', {
+            pageTitle: 'Login',
+            path: '/login',
+            errorMessage: 'Invalid email or password',
+            oldInput: {
+              email: email,
+              password: password,
+            },
+            validationErrors: [],
+          })
         })
         .catch((err) => {
           console.log('Error from postLogin bcrypt.compare: ', err)
