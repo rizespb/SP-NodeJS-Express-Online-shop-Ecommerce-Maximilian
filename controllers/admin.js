@@ -1,3 +1,5 @@
+const { validationResult } = require('express-validator/check')
+
 const Product = require('../models/product')
 
 exports.getAddProduct = (req, res, next) => {
@@ -13,6 +15,10 @@ exports.getAddProduct = (req, res, next) => {
     path: '/admin/add-product',
     // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
     editing: false,
+    // Наличие ошибок валидации
+    hasError: false,
+    errorMessage: null,
+    validationErrors: [],
   })
 }
 
@@ -22,6 +28,27 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl
   const price = req.body.price
   const description = req.body.description
+
+  const errors = validationResult(req)
+
+  // Если есть ошибки валидации, снова возвращаем ту же страницу
+  if (!errors.isEmpty()) {
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/edit-product',
+      // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
+      editing: false,
+      hasError: true,
+      product: {
+        title: title,
+        imageUrl: imageUrl,
+        price: price,
+        description: description,
+      },
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+    })
+  }
 
   // Product - это модель
   // В модель Product передаем объект в соответствии со схемой productSchema
@@ -91,6 +118,10 @@ exports.getEditProduct = (req, res, next) => {
         // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
         editing: editMode,
         product: product,
+        // Наличие ошибок валидации
+        hasError: false,
+        errorMessage: null,
+        validationErrors: [],
       })
     })
     .catch((err) => {
@@ -106,6 +137,28 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price
   const updatedImageUrl = req.body.imageUrl
   const updatedDesc = req.body.description
+
+  const errors = validationResult(req)
+
+  // Если есть ошибки валидации, снова возвращаем ту же страницу
+  if (!errors.isEmpty()) {
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Edit Product',
+      path: '/admin/edit-product',
+      // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
+      editing: true,
+      hasError: true,
+      product: {
+        title: updatedTitle,
+        imageUrl: updatedImageUrl,
+        price: updatedPrice,
+        description: updatedDesc,
+        _id: prodId,
+      },
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+    })
+  }
 
   Product.findById(prodId)
     // Мы получили product и благодаря mongoose можем мутировать этот объек, а потом вызвать save()

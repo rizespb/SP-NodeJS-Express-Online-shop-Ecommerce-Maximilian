@@ -16,8 +16,14 @@ router.get('/signup', authController.getSignup)
 router.post(
   '/login',
   [
+    // normalizeEmail - санитизация данных - sanitizing - приведение данных к виду - без пробелов справа и слева, один регистр и пр.
     body('email').isEmail().withMessage('Please enter a valid email address.').normalizeEmail(),
-    body('password', 'Password has to be valid.').isLength({ min: 4 }).isAlphanumeric().trim(),
+
+    body('password', 'Password has to be valid.')
+      .isLength({ min: 4 })
+      .isAlphanumeric()
+      // Уделание пробелов по краям
+      .trim(),
   ],
   authController.postLogin
 )
@@ -43,18 +49,28 @@ router.post(
         // Проверяем, не занят ли такой емейл
         return User.findOne({ email: value }).then((userDoc) => {
           if (userDoc) {
-            return Promise.reject('This email address is forbidden')
+            return Promise.reject('This email address is already exist')
           }
         })
-      }),
+        // normalizeEmail - санитизация данных - sanitizing - приведение данных к виду - без пробелов справа и слева, один регистр и пр.
+      })
+      .normalizeEmail(),
     //isAlphanumeric - циры и буквы
     // 2nd - сообщение об ошибке, которое будет применяться ко ВСЕМ валидаторам
-    body('password', 'Please enter a password with only numbers and text ahs at least 4 characters').isLength({ min: 4 }).isAlphanumeric(),
-    body('confirmPassword').custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error('Passwords have to match!')
-      }
-    }),
+    body('password', 'Please enter a password with only numbers and text and at least 4 characters')
+      .isLength({ min: 4 })
+      //   .isAlphanumeric()
+      // Уделание пробелов по краям
+      .trim(),
+    body('confirmPassword')
+      .trim()
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error('Passwords have to match!')
+        }
+
+        return true
+      }),
   ],
   authController.postSignup
 )
