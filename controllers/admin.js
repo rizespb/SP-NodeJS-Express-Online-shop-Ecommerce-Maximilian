@@ -55,7 +55,6 @@ exports.postAddProduct = (req, res, next) => {
   // Product - это модель
   // В модель Product передаем объект в соответствии со схемой productSchema
   const product = new Product({
-    _id: new mongoose.Types.ObjectId('6358ccdf2f4cd879c654ef1b'),
     title: title,
     price: price,
     description: description,
@@ -73,7 +72,13 @@ exports.postAddProduct = (req, res, next) => {
     .catch((err) => {
       console.log('Error from postAddProduct: ', err)
 
-      res.redirect('/500')
+      //   res.redirect('/500')
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      // Передача ошибки в качестве аргумента в скажет Express пропустить все остальные middleWare и перейти к middleware для обработки ошибок - Error Handling Middleware
+      return next(error)
     })
 }
 
@@ -95,7 +100,14 @@ exports.getProducts = (req, res, next) => {
         path: 'admin/products',
       })
     })
-    .catch((err) => console.log('Error from getProducts: ', err))
+    .catch((err) => {
+      console.log('Error from getProducts: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
+    })
 }
 
 // Страница для редактирования документа
@@ -111,10 +123,6 @@ exports.getEditProduct = (req, res, next) => {
 
   Product.findById(prodId)
     .then((product) => {
-      if (!product) {
-        return res.redirect('/')
-      }
-
       // Метод render добавляется движком шаблонизатора
       // edit-product - универсальная форма для добавления или роедактирования продукта
       res.render('admin/edit-product', {
@@ -131,6 +139,11 @@ exports.getEditProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from getEditProduct: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
 
@@ -185,6 +198,11 @@ exports.postEditProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from postEditProduct: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
 
@@ -199,5 +217,12 @@ exports.postDeleteProduct = (req, res, next) => {
       console.log('DESTROYED PRODUCT')
       res.redirect('/admin/products')
     })
-    .catch((err) => console.log('Error from postDeleteProduct: ', err))
+    .catch((err) => {
+      console.log('Error from postDeleteProduct: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
+    })
 }

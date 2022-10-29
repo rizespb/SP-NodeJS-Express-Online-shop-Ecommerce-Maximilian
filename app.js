@@ -107,6 +107,14 @@ app.get('/500', errorController.get500)
 // Если к этому моменту мы не нашли никакого совпадающего роута, тогда вернем в ответе 404 страницу
 app.use(errorController.get404)
 
+// Это специальный middleWare (Express узнает его по четырем аргументам) - Error Handling Middleware
+// Если таких middleWare несколько, они будут выполнены все по порядку "сверху вниз"
+// Этот Error Handling Middleware будет вызван, если в функцию next передать объект ошибки или пробросить ошибку в любом (вроде бы) месте приложения вне блока try catch
+app.use((error, req, res, next) => {
+  // res.status(error.httpStatusCode).render(...)
+  res.redirect('/500')
+})
+
 mongoose
   .connect(MONGODB_URI)
   .then((result) => {

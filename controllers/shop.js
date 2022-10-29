@@ -13,6 +13,11 @@ exports.getProducts = (req, res, next) => {
     })
     .catch((err) => {
       console.log('ERROR: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
 
@@ -43,6 +48,11 @@ exports.getIndex = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from getIndex: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
 
@@ -63,6 +73,11 @@ exports.getCart = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from controllers.shop getCart: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
 
@@ -78,6 +93,14 @@ exports.postCart = (req, res, next) => {
       console.log(result)
       res.redirect('/cart')
     })
+    .catch((err) => {
+      console.log('Error from controllers.shop postCart: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
+    })
 }
 
 // Удаление товара из корзины
@@ -92,6 +115,11 @@ exports.postCartDeleteProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from postCartDeleteProduct: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
 
@@ -129,6 +157,11 @@ exports.postOrder = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from controller shop postOrder: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
 
@@ -145,5 +178,10 @@ exports.getOrders = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from getOrders: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }

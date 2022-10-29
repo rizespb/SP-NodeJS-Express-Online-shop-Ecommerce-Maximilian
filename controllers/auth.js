@@ -160,7 +160,14 @@ exports.postLogin = (req, res, next) => {
           res.redirect('/login')
         })
     })
-    .catch((err) => console.log('Error from postLogin: ', err))
+    .catch((err) => {
+      console.log('Error from postLogin: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
+    })
 }
 
 // Регистрация
@@ -203,7 +210,6 @@ exports.postSignup = (req, res, next) => {
       return user.save()
     })
     .then((result) => {
-      console.log('REDIRECT TO LOGIN')
       res.redirect('/login')
 
       // Отправка письма после регистрации
@@ -216,6 +222,11 @@ exports.postSignup = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from postSignup transporter.sendMail: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
 
@@ -320,6 +331,11 @@ exports.getNewPassword = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from getNewPassword User.findOne: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
 
@@ -349,5 +365,10 @@ exports.postNewPassword = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from postNewPassword User.findOne: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
     })
 }
