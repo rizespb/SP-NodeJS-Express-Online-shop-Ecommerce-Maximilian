@@ -69,6 +69,14 @@ app.use(csrfProtection)
 // Обязательно после инициализации сессии это делать
 app.use(flash())
 
+// Этот middleware пробрасывает во ВСЕ view, которые будет возвращать сервер в res.render указанные в locals переменные
+// Он не имеет прямого отношения к библиотеке csurf
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn
+  res.locals.csrfToken = req.csrfToken()
+  next()
+})
+
 // Получаем пользователя, если он авторизован
 app.use((req, res, next) => {
   if (!req.session.user) {
@@ -86,16 +94,8 @@ app.use((req, res, next) => {
       next()
     })
     .catch((err) => {
-      throw new Error(err)
+      next(new Error(err))
     })
-})
-
-// Этот middleware пробрасывает во ВСЕ view, которые будет возвращать сервер в res.render указанные в locals переменные
-// Он не имеет прямого отношения к библиотеке csurf
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn
-  res.locals.csrfToken = req.csrfToken()
-  next()
 })
 
 app.use('/admin', adminRoutes)
@@ -112,7 +112,12 @@ app.use(errorController.get404)
 // Этот Error Handling Middleware будет вызван, если в функцию next передать объект ошибки или пробросить ошибку в любом (вроде бы) месте приложения вне блока try catch
 app.use((error, req, res, next) => {
   // res.status(error.httpStatusCode).render(...)
-  res.redirect('/500')
+  //   res.redirect('/500')
+  res.status(500).render('500', {
+    pageTitle: 'Error',
+    path: '/500',
+    isAuthenticated: req.session.isLoggedIn,
+  })
 })
 
 mongoose
