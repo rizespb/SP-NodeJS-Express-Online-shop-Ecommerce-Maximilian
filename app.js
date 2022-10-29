@@ -77,11 +77,17 @@ app.use((req, res, next) => {
 
   User.findById(req.session.user._id)
     .then((user) => {
+      if (!user) {
+        return next()
+      }
+
       req.user = user
 
       next()
     })
-    .catch((err) => console.log('Error from app.js app.use(): ', err))
+    .catch((err) => {
+      throw new Error(err)
+    })
 })
 
 // Этот middleware пробрасывает во ВСЕ view, которые будет возвращать сервер в res.render указанные в locals переменные
@@ -95,6 +101,8 @@ app.use((req, res, next) => {
 app.use('/admin', adminRoutes)
 app.use(shopRoutes)
 app.use(authRoutes)
+
+app.get('/500', errorController.get500)
 
 // Если к этому моменту мы не нашли никакого совпадающего роута, тогда вернем в ответе 404 страницу
 app.use(errorController.get404)

@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 const { validationResult } = require('express-validator/check')
 
 const Product = require('../models/product')
@@ -35,7 +37,7 @@ exports.postAddProduct = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
-      path: '/admin/edit-product',
+      path: '/admin/add-product',
       // Фалаг editing указывает на то, является ли это режимом редактирования (true) существующего товара или режимом добавления (false) нового товара
       editing: false,
       hasError: true,
@@ -53,6 +55,7 @@ exports.postAddProduct = (req, res, next) => {
   // Product - это модель
   // В модель Product передаем объект в соответствии со схемой productSchema
   const product = new Product({
+    _id: new mongoose.Types.ObjectId('6358ccdf2f4cd879c654ef1b'),
     title: title,
     price: price,
     description: description,
@@ -69,6 +72,8 @@ exports.postAddProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log('Error from postAddProduct: ', err)
+
+      res.redirect('/500')
     })
 }
 
