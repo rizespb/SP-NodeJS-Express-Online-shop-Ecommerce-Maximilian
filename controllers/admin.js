@@ -27,10 +27,10 @@ exports.getAddProduct = (req, res, next) => {
 // Добавление нового продукта
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title
-  const imageUrl = req.body.image
+  const imageUrl = req.file
   const price = req.body.price
   const description = req.body.description
-
+  console.log(imageUrl)
   const errors = validationResult(req)
 
   // Если есть ошибки валидации, снова возвращаем ту же страницу

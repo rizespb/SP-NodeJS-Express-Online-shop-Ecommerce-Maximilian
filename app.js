@@ -13,6 +13,9 @@ const csrf = require('csurf')
 // Flash-сообщения - это сообщения, которые сохраняются в сессии и доступны в обработчике маршрута, на который выполняется следующий переход. Flash-сообщение удаляется из сессии после того, как оно было отображено в представлении.
 const flash = require('connect-flash')
 
+// multer - парсер для извлечения файлов из body
+const multer = require('multer')
+
 const errorController = require('./controllers/error')
 const User = require('./models/user')
 
@@ -33,6 +36,18 @@ const store = new MongoDBStore({
 // Можно добавить настройки, но и по дефолту работает ок
 const csrfProtection = csrf({})
 
+// Конфигурация хранилища для файлов для multer
+const fileStorage = multer.diskStorage({
+  // destination - имя папки для сохранения
+  destination: (req, file, callback) => {
+    callback(null, 'images')
+  },
+  // filename - имя файла
+  filename: (req, file, callback) => {
+    callback(null, Date.now() + '-' + file.originalname)
+  },
+})
+
 // Говорим, что будем использовать ejs
 app.set('view engine', 'ejs')
 // И папку, в которой хранятся шаблоны
@@ -45,6 +60,15 @@ const authRoutes = require('./routes/auth')
 // Регистрируем парсер для body
 // Теперь для каждого входящего запроса будет осуществляться парсинг body перед применением остальных middleware
 app.use(bodyParser.urlencoded({ extended: false }))
+
+// multer - парсер для извлечения файлов из body
+// single означает, что мы ожидаем один файл (не много)
+// image - файл будет в поле image body
+// dest: 'images' - multer соберет полученный файл из буфера из бинарных данных обратно в файл и положит в папку /images
+// app.use(multer({ dest: 'images' }).single('image'))
+// storage - конфигурация хранилища файлов
+// fileFilter - фильтр файлов (в нашем случае по расширению)
+app.use(multer({ storage: fileStorage }).single('image'))
 
 // static - для всех входящих запросов определям папку со статическими файлами (стили, изображения, шрифты и т.д.)
 app.use(express.static(path.join(__dirname, 'public')))
