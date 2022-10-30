@@ -48,6 +48,17 @@ const fileStorage = multer.diskStorage({
   },
 })
 
+// Фильтруем файлы по типу
+const fileFilter = (req, file, callback) => {
+  if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+    // true - если реашем сохранять файл
+    callback(null, true)
+  } else {
+    // false - если реашем не сохранять файл
+    callback(null, false)
+  }
+}
+
 // Говорим, что будем использовать ejs
 app.set('view engine', 'ejs')
 // И папку, в которой хранятся шаблоны
@@ -68,7 +79,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // app.use(multer({ dest: 'images' }).single('image'))
 // storage - конфигурация хранилища файлов
 // fileFilter - фильтр файлов (в нашем случае по расширению)
-app.use(multer({ storage: fileStorage }).single('image'))
+app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'))
 
 // static - для всех входящих запросов определям папку со статическими файлами (стили, изображения, шрифты и т.д.)
 app.use(express.static(path.join(__dirname, 'public')))
