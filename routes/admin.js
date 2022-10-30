@@ -20,12 +20,7 @@ router.get('/products', isAuth, adminController.getProducts)
 router.post(
   '/add-product',
   // Валидация
-  [
-    body('title').isString().isLength({ min: 3 }).trim(),
-    body('imageUrl').isURL(),
-    body('price').isFloat(),
-    body('description').isLength({ min: 5, max: 400 }).trim(),
-  ],
+  [body('title').isString().isLength({ min: 3 }).trim(), body('price').isFloat(), body('description').isLength({ min: 5, max: 400 }).trim()],
   isAuth,
   adminController.postAddProduct
 )
