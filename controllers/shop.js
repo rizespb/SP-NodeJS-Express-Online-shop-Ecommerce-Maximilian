@@ -1,3 +1,6 @@
+const fs = require('fs')
+const path = require('path')
+
 const Product = require('../models/product')
 const Order = require('../models/Order')
 
@@ -184,4 +187,22 @@ exports.getOrders = (req, res, next) => {
 
       return next(error)
     })
+}
+
+exports.getInvoice = (req, res, next) => {
+  const orderId = req.params.orderId
+  const invoiceName = 'invoice-' + orderId + '.pdf'
+  const invoicePath = path.join('data', 'invoices', invoiceName)
+  fs.readFile(invoicePath, (err, data) => {
+    if (err) {
+      return next(err)
+    }
+
+    res.setHeader('Content-type', 'application/pdf')
+    // Указывает браузеру, что делать с файлом
+    // inline - открыть в браузере
+    // filename - имя файла, которое будет дано скачиваемому файлу
+    res.setHeader('Content-disposition', 'inline; filename="' + invoiceName + '"')
+    res.send(data)
+  })
 }
