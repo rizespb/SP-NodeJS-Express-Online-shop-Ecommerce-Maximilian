@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 
+const fileHelper = require('../util/file')
+
 const { validationResult } = require('express-validator/check')
 
 const Product = require('../models/product')
@@ -212,8 +214,11 @@ exports.postEditProduct = (req, res, next) => {
 
       // Если новый файл не загружен, тогда сохраним прежнее изображение (старый путь к файлу) - не будем обновлять это поле в БД
       if (image) {
+        // Удаляем старый файл изображения
+        fileHelper.deleteFile(product.imageUrl)
+
         product.imageUrl = image.path
-      } 
+      }
 
       return product.save().then(() => {
         console.log('UPDATED PRODUCT')
@@ -233,10 +238,17 @@ exports.postEditProduct = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId
 
-  // findByIdAndRemove - метод из mongoose
-  //   Product.findByIdAndRemove(prodId)
-  // Если текущий пользователь не является создателем этого продукта, то заканчиваем и делаем редирект - доп защита
-  Product.deleteOne({ _id: prodId, userId: req.user._id })
+  Product.findById(prodId)
+    .then((product) => {
+      if (!product) {
+        return next(new Error('Product not found'))
+      }
+
+      // Удаляем старый файл изображения
+      fileHelper.deleteFile(product.imageUrl)
+
+      return Product.deleteOne({ _id: prodId, userId: req.user._id })
+    })
     .then(() => {
       console.log('DESTROYED PRODUCT')
       res.redirect('/admin/products')
@@ -249,4 +261,8 @@ exports.postDeleteProduct = (req, res, next) => {
 
       return next(error)
     })
+
+  // findByIdAndRemove - метод из mongoose
+  //   Product.findByIdAndRemove(prodId)
+  // Если текущий пользователь не является создателем этого продукта, то заканчиваем и делаем редирект - доп защита
 }
