@@ -191,18 +191,37 @@ exports.getOrders = (req, res, next) => {
 
 exports.getInvoice = (req, res, next) => {
   const orderId = req.params.orderId
-  const invoiceName = 'invoice-' + orderId + '.pdf'
-  const invoicePath = path.join('data', 'invoices', invoiceName)
-  fs.readFile(invoicePath, (err, data) => {
-    if (err) {
-      return next(err)
-    }
 
-    res.setHeader('Content-type', 'application/pdf')
-    // Указывает браузеру, что делать с файлом
-    // inline - открыть в браузере
-    // filename - имя файла, которое будет дано скачиваемому файлу
-    res.setHeader('Content-disposition', 'inline; filename="' + invoiceName + '"')
-    res.send(data)
-  })
+  Order.findById(orderId)
+    .then((order) => {
+      if (!order) {
+        return next(new Error('No order found'))
+      }
+
+      // Если инвойс не принадлежит пользователю, тогда прокидываем ошибку
+      if (order.user.userId.toString() !== req.user._id.toString()) {
+        return next(new Error('Unauthorized requset for invoice'))
+      }
+
+      const invoiceName = 'invoice-' + orderId + '.pdf'
+      const invoicePath = path.join('data', 'invoices', invoiceName)
+
+      fs.readFile(invoicePath, (err, data) => {
+        if (err) {
+          return next(err)
+        }
+
+        res.setHeader('Content-type', 'application/pdf')
+        // Указывает браузеру, что делать с файлом
+        // inline - открыть в браузере
+        // filename - имя файла, которое будет дано скачиваемому файлу
+        res.setHeader('Content-disposition', 'inline; filename="' + invoiceName + '"')
+        res.send(data)
+      })
+    })
+    .catch((err) => {
+      console.log('Error from getInvoice: ', err)
+
+      next(err)
+    })
 }
