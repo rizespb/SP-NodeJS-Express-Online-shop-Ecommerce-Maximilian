@@ -1,6 +1,8 @@
 const fs = require('fs')
 const path = require('path')
 
+const PDFDocument = require('pdfkit')
+
 const Product = require('../models/product')
 const Order = require('../models/Order')
 
@@ -206,18 +208,56 @@ exports.getInvoice = (req, res, next) => {
       const invoiceName = 'invoice-' + orderId + '.pdf'
       const invoicePath = path.join('data', 'invoices', invoiceName)
 
-      fs.readFile(invoicePath, (err, data) => {
-        if (err) {
-          return next(err)
-        }
+      const pdfDoc = new PDFDocument()
 
-        res.setHeader('Content-type', 'application/pdf')
-        // Указывает браузеру, что делать с файлом
-        // inline - открыть в браузере
-        // filename - имя файла, которое будет дано скачиваемому файлу
-        res.setHeader('Content-disposition', 'inline; filename="' + invoiceName + '"')
-        res.send(data)
+      res.setHeader('Content-type', 'application/pdf')
+      // Указывает браузеру, что делать с файлом
+      // inline - открыть в браузере
+      // filename - имя файла, которое будет дано скачиваемому файлу
+      res.setHeader('Content-disposition', 'inline; filename="' + invoiceName + '"')
+
+      // Создаем поток через pipe для записи этого файла через поток диск
+      pdfDoc.pipe(fs.createWriteStream(invoicePath))
+      // Параллельно создаем pipe для отправки этого файла
+      pdfDoc.pipe(res)
+
+      pdfDoc.fontSize(26).text('Invoice', {
+        underline: true,
       })
+
+      pdfDoc.text('--------------------------------------')
+
+      let totalPrice = 0
+      order.products.forEach((prod) => {
+        totalPrice += prod.quantity * prod.product.price
+
+        pdfDoc.fontSize(14).text(prod.product.title + ' - ' + prod.quantity + ' x ' + '$' + prod.product.price)
+      })
+
+      pdfDoc.text('------')
+      pdfDoc.fontSize(20).text('Total Price: $' + totalPrice)
+
+      // end скажет, что запись закончена и можно отсылать файл
+      pdfDoc.end()
+
+      // Синхронное чтение и отправка
+      //   fs.readFile(invoicePath, (err, data) => {
+      //     if (err) {
+      //       return next(err)
+      //     }
+
+      //     res.setHeader('Content-type', 'application/pdf')
+      //     res.setHeader('Content-disposition', 'inline; filename="' + invoiceName + '"')
+      //     res.send(data)
+      //   })
+
+      //   // Асинхронное чтение и отправка
+      //   const file = fs.createReadStream(invoicePath)
+      //   res.setHeader('Content-type', 'application/pdf')
+      //   res.setHeader('Content-disposition', 'inline; filename="' + invoiceName + '"')
+
+      //   // Направляем считанную часть данных сразу в объект response, создавая поток между сервером и браузером
+      //   file.pipe(res)
     })
     .catch((err) => {
       console.log('Error from getInvoice: ', err)
