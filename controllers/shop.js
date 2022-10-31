@@ -6,6 +6,9 @@ const PDFDocument = require('pdfkit')
 const Product = require('../models/product')
 const Order = require('../models/Order')
 
+// Количество товаров на странице
+const ITEMS_PER_PAGE = 4
+
 exports.getProducts = (req, res, next) => {
   // find - метод из mongoose
   Product.find()
@@ -42,8 +45,15 @@ exports.getProduct = (req, res, next) => {
 }
 
 exports.getIndex = (req, res, next) => {
+  // Пагинация
+  const page = req.query.page
+
   // find - метод из mongoose
   Product.find()
+    // Для пагинации: пропускаем skip указанное количество результатов
+    // limit - получить указанное количество документов
+    .skip((page - 1) * ITEMS_PER_PAGE)
+    .limit(ITEMS_PER_PAGE)
     .then((products) => {
       res.render('shop/index', {
         prods: products,
