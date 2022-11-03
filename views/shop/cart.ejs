@@ -31,13 +31,14 @@
                     <hr>
 
                     <div class="centered">
-                        <form action="/create-order" method="post">
-                            <!-- Токен для защиты от CSRF-атак (межсайтовая подделка запроса) name="_csrf" - такое имя в body post-запроса будет искать библиотека csurf -->
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <!-- <form action="/create-order" method="post"> -->
+                        <!-- Токен для защиты от CSRF-атак (межсайтовая подделка запроса) name="_csrf" - такое имя в body post-запроса будет искать библиотека csurf -->
+                        <!-- <input type="hidden" name="_csrf" value="<%= csrfToken %>"> -->
 
-                            <button type="submit" class="btn">Order
-                                Now!</button>
-                        </form>
+                        <!-- <button type="submit" class="btn">Order -->
+                        <!-- Now!</button> -->
+                        <!-- </form> -->
+                        <a class="btn" href="/checkout">Order Now!</a>
                     </div>
 
                     <% } else { %>

@@ -1,6 +1,10 @@
 const fs = require('fs')
 const path = require('path')
 
+// Онлайн-оплата через Stripe
+// Передаем Secret key со страницы https://dashboard.stripe.com/test/apikeys
+const stripe = require('stripe')('sk_test_51LzzWPLBy6dbanxC0gafNnjiroSyBb9DuoScMmIvtnxOFNn6kjSW5qBLeQnZACAkLdqbLgSXfqJccE0EmGVv7kI200ohG5nvTg')
+
 const PDFDocument = require('pdfkit')
 
 const Product = require('../models/product')
@@ -175,8 +179,82 @@ exports.postCartDeleteProduct = (req, res, next) => {
     })
 }
 
-// Создать заказ
-exports.postOrder = (req, res, next) => {
+// Получение страницы для оплаты
+exports.getCheckout = (req, res, next) => {
+  let products
+  // Общая стоимость товаров
+  let total = 0
+
+  // Мы добавили объект user в запрос res в middleWare в app.js
+  // Метод getCart у юзеров после установления связей в app.js Cart.belongsTo(User)
+  req.user
+    // Наполнить поле productId данными о связанном объекте
+    .populate('cart.items.productId')
+    .then((user) => {
+      products = user.cart.items
+
+      // Общая стоимость товаров
+      total = 0
+      products.forEach((prod) => {
+        total += prod.quantity * prod.productId.price
+      })
+
+      // Онлайн-оплата через Stripe
+      // Создаем сессию Stripe и конфигурируем ее
+      return stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        // Так у Максимилиана, но у меня так не работало
+        // список товаров в отпределенном виде
+        // line_items: products.map((product) => {
+        //   return {
+        //     name: product.productId.title,
+        //     description: product.productId.description,
+        //     // Стоимость передаем в центах
+        //     amount: product.productId.price * 100,
+        //     currency: 'usd',
+        //     quantity: product.quantity,
+        //   }
+        // }),
+        success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
+        cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
+        // Для тестовых платежей
+        mode: 'payment',
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              unit_amount: 500,
+              product_data: {
+                name: 'name of the product',
+              },
+            },
+            quantity: 1,
+          },
+        ],
+      })
+    })
+    .then((session) => {
+      res.render('shop/checkout', {
+        path: '/checkout',
+        pageTitle: 'Checkout',
+        products: products,
+        totalSum: total,
+        // ID сессии Stripe
+        sessionId: session.id,
+      })
+    })
+    .catch((err) => {
+      console.log('Error from controllers.shop getCheckout: ', err)
+
+      const error = new Error(err)
+      error.httpStatusCode = 500
+
+      return next(error)
+    })
+}
+
+// После успешной оплаты
+exports.getCheckoutSuccess = (req, res, next) => {
   req.user
     // Наполнить поле productId данными о связанном объекте
     .populate('cart.items.productId')
